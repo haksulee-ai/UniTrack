@@ -17,6 +17,7 @@ h1{font-size:32px;margin:10px 0}p{font-size:18px;line-height:1.5;color:#555}
 input{box-sizing:border-box;width:100%;height:58px;font-size:18px;padding:0 14px;border:1px solid #bbb;border-radius:12px}
 button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;background:#075b9b;color:#fff;font-size:22px;font-weight:800}
 #app{display:none;width:100%;height:100%;border:0}
+#changeUrl{display:none;position:fixed;right:12px;top:calc(12px + env(safe-area-inset-top));z-index:99999;width:auto;height:42px;margin:0;padding:0 14px;border:1px solid #075b9b;border-radius:21px;background:#fff;color:#075b9b;font-size:14px;font-weight:800;box-shadow:0 2px 8px #0003}
 .small{font-size:14px;color:#777}
 </style>
 </head>
@@ -31,13 +32,22 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   <p class="small">배포 URL은 이 기기에만 저장됩니다.</p>
  </div>
 </div>
+<button id="changeUrl" type="button" onclick="changeConnection()">연결 주소 변경</button>
 <iframe id="app" allow="camera *; microphone *; clipboard-read *; clipboard-write *"></iframe>
 <script>
 const KEY='unitrack_apps_script_url';
 function valid(u){return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test((u||'').trim())}
 function openApp(u){
  document.getElementById('setup').style.display='none';
+ document.getElementById('changeUrl').style.display='block';
  const f=document.getElementById('app');f.style.display='block';f.src=u;
+}
+function changeConnection(){
+ const current=localStorage.getItem(KEY)||'';
+ const f=document.getElementById('app');f.src='about:blank';f.style.display='none';
+ document.getElementById('changeUrl').style.display='none';
+ document.getElementById('setup').style.display='flex';
+ const input=document.getElementById('url');input.value=current;input.focus();input.select();
 }
 function saveAndOpen(){
  const u=document.getElementById('url').value.trim();

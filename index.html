@@ -17,6 +17,7 @@ h1{font-size:32px;margin:10px 0}p{font-size:18px;line-height:1.5;color:#555}
 input{box-sizing:border-box;width:100%;height:58px;font-size:18px;padding:0 14px;border:1px solid #bbb;border-radius:12px}
 button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;background:#075b9b;color:#fff;font-size:22px;font-weight:800}
 #app{display:none;width:100%;height:100%;border:0}
+#notifyBtn{display:none;position:fixed;right:8px;top:calc(8px + env(safe-area-inset-top));z-index:100000;width:50px;height:34px;margin:0;padding:0;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:16px;font-weight:800;box-shadow:0 2px 8px #0003}
 #changeUrl{display:none;position:fixed;right:66px;left:auto;top:calc(8px + env(safe-area-inset-top));z-index:99999;width:auto;height:34px;margin:0;padding:0 10px;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:11px;font-weight:800;box-shadow:0 2px 8px #0003;white-space:nowrap}
 .small{font-size:14px;color:#777}
 
@@ -124,6 +125,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   <p class="small">배포 URL은 이 기기에만 저장됩니다.</p>
  </div>
 </div>
+<button id="notifyBtn" type="button" onclick="enableNotifications()" title="알림 설정">🔔</button>
 <button id="changeUrl" type="button" onclick="changeConnection()">연결 주소 변경</button>
 <div id="pwaScanner">
   <video id="pwaScanVideo" playsinline autoplay muted></video>
@@ -139,12 +141,14 @@ function valid(u){return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:
 function openApp(u){
  document.getElementById('setup').style.display='none';
  document.getElementById('changeUrl').style.display='block';
+ document.getElementById('notifyBtn').style.display='block';
  const f=document.getElementById('app');f.style.display='block';f.src=u;
 }
 function changeConnection(){
  const current=localStorage.getItem(KEY)||'';
  const f=document.getElementById('app');f.src='about:blank';f.style.display='none';
  document.getElementById('changeUrl').style.display='none';
+ document.getElementById('notifyBtn').style.display='none';
  document.getElementById('setup').style.display='flex';
  const input=document.getElementById('url');input.value=current;input.focus();input.select();
 }
@@ -156,6 +160,42 @@ function saveAndOpen(){
 const saved=localStorage.getItem(KEY);
 if(saved&&valid(saved))openApp(saved);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
+</script>
+<script>
+
+async function enableNotifications(){
+  if(!('Notification' in window)){alert('이 기기/브라우저는 웹 알림을 지원하지 않습니다.');return}
+  let p=Notification.permission;
+  if(p!=='granted') p=await Notification.requestPermission();
+  if(p!=='granted'){alert('UniTrack 알림 권한이 허용되지 않았습니다.');return}
+  localStorage.setItem('unitrack_notify_enabled','1');
+  const reg=await navigator.serviceWorker.ready;
+  await reg.showNotification('UniTrack 알림 테스트',{
+    body:'알림 연결 완료 · 통합시트 기록 시 알림을 표시합니다.',
+    icon:'./icon-192.png',badge:'./icon-192.png',tag:'unitrack-test',renotify:true
+  });
+}
+async function showMovementNotification(d){
+  if(localStorage.getItem('unitrack_notify_enabled')!=='1')return;
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  const key=String(d.barcode||d.serial||d.unit||'유니트');
+  const status=String(d.toStatus||'통합시트 기록');
+  const name=String(d.name||'');
+  const body=[key,status,name].filter(Boolean).join(' · ');
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    await reg.showNotification('UniTrack 유동기록',{
+      body:body,icon:'./icon-192.png',badge:'./icon-192.png',
+      tag:'unitrack-movement-'+Date.now(),renotify:true,data:{url:location.href}
+    });
+    if(navigator.vibrate)navigator.vibrate([100,50,100]);
+  }catch(_){}
+}
+window.addEventListener('message',function(e){
+  const d=e.data||{};
+  if(d.type==='UNITRACK_MOVEMENT_SAVED') showMovementNotification(d);
+});
+
 </script>
 
 <script>

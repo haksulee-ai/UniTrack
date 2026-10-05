@@ -389,4 +389,46 @@ window.addEventListener('message',ev=>{
   },true);
 })();
 </script>
+
+<script>
+(function(){
+  const FIXED='https://script.google.com/macros/s/AKfycby94pRfhnMGDxpsgcbzexB7-HjPHKGAmhZkg7MnQFTot7CGCXUSP-LIi-kRDUSwfOCv/exec';
+  function bootUniTrack(){
+    try{localStorage.setItem('unitrack_apps_script_url',FIXED);}catch(e){}
+    const f=document.getElementById('app') || document.querySelector('iframe');
+    if(!f) return;
+    if(f.getAttribute('src')!==FIXED) f.setAttribute('src',FIXED);
+    f.style.display='block';
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',bootUniTrack,{once:true});
+  } else {
+    bootUniTrack();
+  }
+  window.addEventListener('pageshow',bootUniTrack);
+})();
+</script>
+
+
+<script>
+(function(){
+  const f=document.getElementById('app')||document.querySelector('iframe');
+  if(!f)return;
+  let t=setTimeout(function(){
+    if(!document.getElementById('unitrackLoadNote')){
+      const d=document.createElement('div');
+      d.id='unitrackLoadNote';
+      d.textContent='UniTrack 연결 중…';
+      d.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;font:600 15px sans-serif;color:#666';
+      document.body.appendChild(d);
+    }
+  },1500);
+  f.addEventListener('load',function(){
+    clearTimeout(t);
+    const d=document.getElementById('unitrackLoadNote');
+    if(d)d.remove();
+  });
+})();
+</script>
+
 </body></html>

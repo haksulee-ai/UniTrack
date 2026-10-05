@@ -143,6 +143,7 @@ function openApp(u){
  document.getElementById('setup').style.display='none';
  document.getElementById('changeUrl').style.display='block';
  document.getElementById('notifyBtn').style.display='block';
+ setTimeout(placeNotifyButton,0);
  const f=document.getElementById('app');f.style.display='block';f.src=u;
 }
 function changeConnection(){
@@ -164,6 +165,19 @@ if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.ser
 </script>
 <script>
 
+
+function placeNotifyButton(){
+  const b=document.getElementById('notifyBtn'), c=document.getElementById('changeUrl');
+  if(!b||!c||getComputedStyle(c).display==='none')return;
+  const r=c.getBoundingClientRect();
+  b.style.setProperty('left',Math.max(8,r.left-b.offsetWidth-8)+'px','important');
+  b.style.setProperty('right','auto','important');
+  b.style.setProperty('top',r.top+'px','important');
+}
+window.addEventListener('resize',placeNotifyButton);
+window.addEventListener('orientationchange',()=>setTimeout(placeNotifyButton,150));
+setTimeout(placeNotifyButton,250);
+
 async function enableNotifications(){
   if(!('Notification' in window)){alert('이 기기/브라우저는 웹 알림을 지원하지 않습니다.');return}
   let p=Notification.permission;
@@ -184,10 +198,20 @@ async function showMovementNotification(d){
   if(noticeKey && noticeKey===lastMovementNoticeKey && now-lastMovementNoticeAt<2500)return;
   lastMovementNoticeKey=noticeKey; lastMovementNoticeAt=now;
   if(!('Notification' in window)||Notification.permission!=='granted')return;
-  const key=String(d.barcode||d.serial||d.unit||'유니트');
+  const unit=String(d.unit||'-');
   const status=String(d.toStatus||'통합시트 기록');
-  const name=String(d.name||'');
-  const body=[key,status,name].filter(Boolean).join(' · ');
+  const barcode=String(d.barcode||'-');
+  const serial=String(d.serial||'-');
+  const savedAt=String(d.savedAt||new Date().toLocaleString('ko-KR'));
+  const name=String(d.name||'-');
+  const body=[
+    'Unit : '+unit,
+    '변경상태 : '+status,
+    'SKT바코드 : '+barcode,
+    'Serial No. : '+serial,
+    '날짜/시간 : '+savedAt,
+    '처리자 : '+name
+  ].join('\n');
   try{
     const reg=await navigator.serviceWorker.ready;
     await reg.showNotification('UniTrack 유동기록',{

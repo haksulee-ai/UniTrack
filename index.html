@@ -91,7 +91,7 @@ if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.ser
 </script>
 
 <script>
-let pwaScanStream=null,pwaScanTimer=null,pwaScanBusy=false,pwaScanRequester=null,pwaScanRequestId='';
+let pwaScanStream=null,pwaScanTimer=null,pwaScanBusy=false,pwaScanRequester=null,pwaScanRequestId='',pwaScanPort=null;
 async function openPwaScanner(){
   if(pwaScanBusy)return;
   pwaScanBusy=true;
@@ -120,7 +120,10 @@ async function openPwaScanner(){
           try{navigator.vibrate&&navigator.vibrate([80,35,80])}catch(_){}
           closePwaScanner();
           const payload={type:'UNITRACK_SCAN_RESULT',value,requestId:pwaScanRequestId};
-          // Primary: reply to the exact requesting frame.
+          // Primary: dedicated MessageChannel. This is independent of Google iframe nesting/origin.
+          try{if(pwaScanPort){pwaScanPort.postMessage(payload);pwaScanPort.close();}}catch(_){}
+          pwaScanPort=null;
+          // Secondary: reply to the exact requesting frame.
           try{pwaScanRequester&&pwaScanRequester.postMessage(payload,'*')}catch(_){}
           // Secondary: deliver to iframe and its Google wrapper descendants.
           try{
@@ -140,8 +143,11 @@ async function openPwaScanner(){
   }catch(e){
     closePwaScanner();
     // Let the Apps Script layer use its existing native-photo fallback.
+    const fb={type:'UNITRACK_SCAN_FALLBACK'};
+    try{if(pwaScanPort){pwaScanPort.postMessage(fb);pwaScanPort.close();}}catch(_){}
+    pwaScanPort=null;
     const target=pwaScanRequester||document.getElementById('app').contentWindow;
-    try{target.postMessage({type:'UNITRACK_SCAN_FALLBACK'},'*')}catch(_){}
+    try{target.postMessage(fb,'*')}catch(_){}
     pwaScanRequester=null;
   }finally{
     pwaScanBusy=false;
@@ -155,7 +161,13 @@ function closePwaScanner(){
 }
 window.addEventListener('message',ev=>{
   const d=ev.data||{};
-  if(d.type==='UNITRACK_SCAN_REQUEST'){pwaScanRequester=ev.source;pwaScanRequestId=d.requestId||'';openPwaScanner();}
+  if(d.type==='UNITRACK_SCAN_REQUEST'){
+    pwaScanRequester=ev.source;
+    pwaScanRequestId=d.requestId||'';
+    pwaScanPort=(ev.ports&&ev.ports[0])||null;
+    try{pwaScanPort&&pwaScanPort.start&&pwaScanPort.start()}catch(_){}
+    openPwaScanner();
+  }
 });
 </script>
 </body></html>

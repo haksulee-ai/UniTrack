@@ -19,6 +19,30 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 #app{display:none;width:100%;height:100%;border:0}
 #changeUrl{display:none;position:fixed;right:66px;left:auto;top:calc(8px + env(safe-area-inset-top));z-index:99999;width:auto;height:34px;margin:0;padding:0 10px;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:11px;font-weight:800;box-shadow:0 2px 8px #0003;white-space:nowrap}
 .small{font-size:14px;color:#777}
+
+#pwaScanner{display:none;position:fixed;inset:0;z-index:200000;background:#000}
+#pwaScanner.active{display:block}
+#pwaScanVideo{width:100%;height:100%;object-fit:cover;background:#000}
+#pwaScanShade{position:absolute;inset:0;background:rgba(0,0,0,.08);pointer-events:none}
+#pwaFocusBox{position:absolute;left:10%;right:10%;top:18%;bottom:10%;border:3px solid rgba(255,255,255,.95);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.12);pointer-events:none}
+#pwaFocusBox:before,#pwaFocusBox:after{content:"";position:absolute;width:42px;height:42px}
+#pwaFocusBox:before{left:-4px;top:-4px;border-left:5px solid #fff;border-top:5px solid #fff;border-radius:12px 0 0 0}
+#pwaFocusBox:after{right:-4px;bottom:-4px;border-right:5px solid #fff;border-bottom:5px solid #fff;border-radius:0 0 12px 0}
+#pwaScanGuide{position:absolute;left:50%;top:10%;transform:translateX(-50%);color:#fff;background:rgba(0,0,0,.45);padding:8px 14px;border-radius:18px;font-size:14px;font-weight:800;white-space:nowrap}
+#pwaScanClose{position:absolute;right:18px;top:calc(18px + env(safe-area-inset-top));width:48px;height:48px;margin:0;padding:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:27px;z-index:2}
+@media (orientation: portrait) and (max-aspect-ratio:4/5){
+  #changeUrl{right:112px!important}
+}
+</style>
+
+<style>
+/* v7.14.24: portrait only.
+   Keep wide/landscape exactly as v7.14.23. */
+@media (orientation: portrait) and (max-aspect-ratio: 4/5){
+  #changeUrl{
+    right:82px!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -33,6 +57,13 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
  </div>
 </div>
 <button id="changeUrl" type="button" onclick="changeConnection()">연결 주소 변경</button>
+<div id="pwaScanner">
+  <video id="pwaScanVideo" playsinline autoplay muted></video>
+  <div id="pwaScanShade"></div>
+  <div id="pwaFocusBox"></div>
+  <div id="pwaScanGuide">바코드 / QR 코드를 네모 안에 맞춰주세요</div>
+  <button id="pwaScanClose" type="button" onclick="closePwaScanner()">×</button>
+</div>
 <iframe id="app" allow="camera *; microphone *; clipboard-read *; clipboard-write *" allowfullscreen></iframe>
 <script>
 const KEY='unitrack_apps_script_url';
@@ -57,5 +88,59 @@ function saveAndOpen(){
 const saved=localStorage.getItem(KEY);
 if(saved&&valid(saved))openApp(saved);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
+</script>
+
+<script>
+let pwaScanStream=null,pwaScanTimer=null,pwaScanBusy=false;
+async function openPwaScanner(){
+  if(pwaScanBusy)return;
+  pwaScanBusy=true;
+  const box=document.getElementById('pwaScanner'),video=document.getElementById('pwaScanVideo');
+  box.classList.add('active');
+  try{
+    pwaScanStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},
+      audio:false
+    });
+    video.srcObject=pwaScanStream;
+    await video.play();
+    if(!('BarcodeDetector' in window))throw new Error('BarcodeDetector unsupported');
+    let formats=[];try{formats=await BarcodeDetector.getSupportedFormats()}catch(_){}
+    const wanted=['qr_code','code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','data_matrix'];
+    const use=wanted.filter(x=>formats.includes(x));
+    const detector=use.length?new BarcodeDetector({formats:use}):new BarcodeDetector();
+    let detecting=false;
+    pwaScanTimer=setInterval(async()=>{
+      if(detecting||!pwaScanStream||video.readyState<2)return;
+      detecting=true;
+      try{
+        const rs=await detector.detect(video);
+        if(rs&&rs.length&&rs[0].rawValue){
+          const value=String(rs[0].rawValue).trim();
+          try{navigator.vibrate&&navigator.vibrate([80,35,80])}catch(_){}
+          closePwaScanner();
+          document.getElementById('app').contentWindow.postMessage({type:'UNITRACK_SCAN_RESULT',value},'*');
+        }
+      }catch(_){}
+      detecting=false;
+    },160);
+  }catch(e){
+    closePwaScanner();
+    // Let the Apps Script layer use its existing native-photo fallback.
+    document.getElementById('app').contentWindow.postMessage({type:'UNITRACK_SCAN_FALLBACK'},'*');
+  }finally{
+    pwaScanBusy=false;
+  }
+}
+function closePwaScanner(){
+  if(pwaScanTimer){clearInterval(pwaScanTimer);pwaScanTimer=null}
+  if(pwaScanStream){pwaScanStream.getTracks().forEach(t=>t.stop());pwaScanStream=null}
+  const v=document.getElementById('pwaScanVideo');if(v)v.srcObject=null;
+  const box=document.getElementById('pwaScanner');if(box)box.classList.remove('active');
+}
+window.addEventListener('message',ev=>{
+  const d=ev.data||{};
+  if(d.type==='UNITRACK_SCAN_REQUEST')openPwaScanner();
+});
 </script>
 </body></html>

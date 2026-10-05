@@ -177,13 +177,44 @@ function sendPwaScanResult(value){
       img.src=base+'?action=scanResult&id='+encodeURIComponent(id)+'&value='+encodeURIComponent(value)+'&_='+Date.now();
       document.body.appendChild(img);
       setTimeout(()=>{try{img.remove()}catch(_){}},4000);
+
+      // Hidden GET navigation reliably executes Apps Script doGet even if an image MIME redirect is rejected.
+      let sink=document.getElementById('unitrackScanSink');
+      if(!sink){
+        sink=document.createElement('iframe');
+        sink.id='unitrackScanSink';sink.name='unitrackScanSink';
+        sink.style.display='none';document.body.appendChild(sink);
+      }
+      const form=document.createElement('form');
+      form.method='GET';form.action=base;form.target='unitrackScanSink';form.style.display='none';
+      [['action','scanResult'],['id',id],['value',value],['_',String(Date.now())]].forEach(function(pair){
+        const inp=document.createElement('input');inp.type='hidden';inp.name=pair[0];inp.value=pair[1];form.appendChild(inp);
+      });
+      document.body.appendChild(form);form.submit();
+      setTimeout(()=>{try{form.remove()}catch(_){}},1000);
     }
   }catch(_){}
   // Keep previous direct channels as secondary fallbacks.
   const payload={type:'UNITRACK_SCAN_RESULT',value,requestId:id};
+  // Direct return paths first.
   try{if(pwaScanPort){pwaScanPort.postMessage(payload);pwaScanPort.close()}}catch(_){}
   try{pwaScanRequester&&pwaScanRequester.postMessage(payload,'*')}catch(_){}
-  setTimeout(closePwaScanner,120);
+  // Google can wrap the Apps Script iframe. Broadcast to every iframe we can reach.
+  try{
+    document.querySelectorAll('iframe').forEach(function(fr){
+      try{fr.contentWindow.postMessage(payload,'*')}catch(_){}
+    });
+  }catch(_){}
+  // Repeat after the camera closes; this avoids losing the message during video teardown.
+  setTimeout(function(){
+    try{pwaScanRequester&&pwaScanRequester.postMessage(payload,'*')}catch(_){}
+    try{
+      document.querySelectorAll('iframe').forEach(function(fr){
+        try{fr.contentWindow.postMessage(payload,'*')}catch(_){}
+      });
+    }catch(_){}
+    closePwaScanner();
+  },180);
 }
 
 async function openPwaScanner(){

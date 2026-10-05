@@ -44,6 +44,50 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   }
 }
 </style>
+
+<style id="unitrack-pwa-scan-v71437">
+/* v7.14.37 — PWA owns the visible scanner UI */
+#pwaScannerOverlay .pwaScanFrame,
+#scannerOverlay .scanFrame,
+.scan-overlay .scan-frame{
+  position:absolute!important;
+  left:6%!important; right:6%!important;
+  top:28%!important; height:300px!important;
+  width:auto!important;
+  border:3px solid rgba(255,255,255,.98)!important;
+  border-radius:18px!important;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.22),0 0 18px rgba(255,255,255,.35)!important;
+  overflow:hidden!important;
+  z-index:20!important;
+}
+#pwaScannerOverlay .pwaScanFrame::before,
+#scannerOverlay .scanFrame::before,
+.scan-overlay .scan-frame::before{
+  content:""!important; position:absolute!important;
+  left:3%!important; right:3%!important; top:8%!important;
+  height:4px!important; border-radius:4px!important;
+  background:#ff1638!important;
+  box-shadow:0 0 4px #fff,0 0 10px #ff1638,0 0 20px #ff1638!important;
+  animation:unitrackPwaLaser 1.15s ease-in-out infinite alternate!important;
+  z-index:30!important;
+}
+@keyframes unitrackPwaLaser{
+  from{transform:translateY(0)}
+  to{transform:translateY(245px)}
+}
+#pwaScannerOverlay .pwaScanFrame::after,
+#scannerOverlay .scanFrame::after,
+.scan-overlay .scan-frame::after{
+  content:""!important; position:absolute!important; inset:10px!important;
+  border:1px solid rgba(255,255,255,.34)!important;
+  border-radius:12px!important; pointer-events:none!important;
+}
+@media (orientation:landscape){
+ #pwaScannerOverlay .pwaScanFrame,#scannerOverlay .scanFrame,.scan-overlay .scan-frame{
+   left:18%!important;right:18%!important;top:18%!important;height:280px!important;
+ }
+}
+</style>
 </head>
 <body>
 <div id="setup">
@@ -117,7 +161,7 @@ async function openPwaScanner(){
         const rs=await detector.detect(video);
         if(rs&&rs.length&&rs[0].rawValue){
           const value=String(rs[0].rawValue).trim();
-          try{navigator.vibrate&&navigator.vibrate([80,35,80])}catch(_){}
+          try{navigator.vibrate&&navigator.vibrate([110,55,110])}catch(_){}
           closePwaScanner();
           const payload={type:'UNITRACK_SCAN_RESULT',value,requestId:pwaScanRequestId};
           // Primary: dedicated MessageChannel. This is independent of Google iframe nesting/origin.
@@ -169,5 +213,17 @@ window.addEventListener('message',ev=>{
     openPwaScanner();
   }
 });
+</script>
+
+<script id="unitrack-pwa-scan-feedback-v71437">
+(function(){
+  window.addEventListener('message',function(ev){
+    var d=ev.data||{};
+    var t=String(d.type||'').toUpperCase();
+    if((t.indexOf('SCAN')>=0 && (d.value||d.code||d.text||d.result))){
+      try{ if(navigator.vibrate) navigator.vibrate([110,55,110]); }catch(_){}
+    }
+  },true);
+})();
 </script>
 </body></html>

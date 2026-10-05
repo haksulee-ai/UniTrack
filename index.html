@@ -88,6 +88,30 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
  }
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.12.1/dist/quagga.min.js"></script>
+<style id="unitrack-pwa-scan-v71438">
+#pwaFocusBox{
+  position:absolute!important;left:7%!important;right:7%!important;
+  top:25%!important;bottom:auto!important;height:310px!important;
+  border:3px solid #fff!important;border-radius:18px!important;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.20),0 0 16px rgba(255,255,255,.45)!important;
+  overflow:hidden!important;z-index:20!important;pointer-events:none!important;
+}
+#pwaLaser{
+  display:block!important;position:absolute!important;
+  left:3%!important;right:3%!important;top:7%!important;height:5px!important;
+  background:#ff1538!important;border-radius:5px!important;
+  box-shadow:0 0 4px #fff,0 0 11px #ff1538,0 0 22px #ff1538!important;
+  animation:pwaLaserSweep 1.05s ease-in-out infinite alternate!important;
+  will-change:transform!important;z-index:30!important;
+}
+@keyframes pwaLaserSweep{from{transform:translateY(0)}to{transform:translateY(260px)}}
+#pwaScanGuide{z-index:25!important}
+@media (orientation:landscape){
+ #pwaFocusBox{left:18%!important;right:18%!important;top:18%!important;height:280px!important}
+ @keyframes pwaLaserSweep{from{transform:translateY(0)}to{transform:translateY(230px)}}
+}
+</style>
 </head>
 <body>
 <div id="setup">
@@ -104,7 +128,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 <div id="pwaScanner">
   <video id="pwaScanVideo" playsinline autoplay muted></video>
   <div id="pwaScanShade"></div>
-  <div id="pwaFocusBox"></div>
+  <div id="pwaFocusBox"><div id="pwaLaser"></div></div>
   <div id="pwaScanGuide">바코드 / QR 코드를 네모 안에 맞춰주세요</div>
   <button id="pwaScanClose" type="button" onclick="closePwaScanner()">×</button>
 </div>
@@ -135,73 +159,103 @@ if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.ser
 </script>
 
 <script>
-let pwaScanStream=null,pwaScanTimer=null,pwaScanBusy=false,pwaScanRequester=null,pwaScanRequestId='',pwaScanPort=null;
+let pwaScanStream=null,pwaScanTimer=null,pwaScanBusy=false,pwaScanRequester=null,pwaScanRequestId='',pwaScanPort=null,pwaQuaggaTimer=null,pwaDone=false;
+
+function sendPwaScanResult(value){
+  value=String(value||'').trim();
+  if(!value||pwaDone)return;
+  pwaDone=true;
+  try{if(navigator.vibrate)navigator.vibrate([120,55,120])}catch(_){}
+  const id=pwaScanRequestId;
+  // Primary v7.14.38 bridge: GET image beacon to the same Apps Script /exec.
+  // Apps Script iframe polls CacheService for this requestId.
+  try{
+    const base=(localStorage.getItem(KEY)||'').split('?')[0];
+    if(base&&id){
+      const img=new Image();
+      img.style.display='none';
+      img.src=base+'?action=scanResult&id='+encodeURIComponent(id)+'&value='+encodeURIComponent(value)+'&_='+Date.now();
+      document.body.appendChild(img);
+      setTimeout(()=>{try{img.remove()}catch(_){}},4000);
+    }
+  }catch(_){}
+  // Keep previous direct channels as secondary fallbacks.
+  const payload={type:'UNITRACK_SCAN_RESULT',value,requestId:id};
+  try{if(pwaScanPort){pwaScanPort.postMessage(payload);pwaScanPort.close()}}catch(_){}
+  try{pwaScanRequester&&pwaScanRequester.postMessage(payload,'*')}catch(_){}
+  setTimeout(closePwaScanner,120);
+}
+
 async function openPwaScanner(){
   if(pwaScanBusy)return;
-  pwaScanBusy=true;
+  pwaScanBusy=true;pwaDone=false;
   const box=document.getElementById('pwaScanner'),video=document.getElementById('pwaScanVideo');
   box.classList.add('active');
   try{
     pwaScanStream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},
+      video:{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1440}},
       audio:false
     });
+    try{
+      const tr=pwaScanStream.getVideoTracks()[0],caps=tr&&tr.getCapabilities?tr.getCapabilities():{};
+      if(caps.focusMode&&Array.from(caps.focusMode).includes('continuous'))
+        await tr.applyConstraints({advanced:[{focusMode:'continuous'}]});
+    }catch(_){}
     video.srcObject=pwaScanStream;
     await video.play();
-    if(!('BarcodeDetector' in window))throw new Error('BarcodeDetector unsupported');
-    let formats=[];try{formats=await BarcodeDetector.getSupportedFormats()}catch(_){}
-    const wanted=['qr_code','code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','data_matrix'];
-    const use=wanted.filter(x=>formats.includes(x));
-    const detector=use.length?new BarcodeDetector({formats:use}):new BarcodeDetector();
-    let detecting=false;
-    pwaScanTimer=setInterval(async()=>{
-      if(detecting||!pwaScanStream||video.readyState<2)return;
-      detecting=true;
-      try{
-        const rs=await detector.detect(video);
-        if(rs&&rs.length&&rs[0].rawValue){
-          const value=String(rs[0].rawValue).trim();
-          try{navigator.vibrate&&navigator.vibrate([110,55,110])}catch(_){}
-          closePwaScanner();
-          const payload={type:'UNITRACK_SCAN_RESULT',value,requestId:pwaScanRequestId};
-          // Primary: dedicated MessageChannel. This is independent of Google iframe nesting/origin.
-          try{if(pwaScanPort){pwaScanPort.postMessage(payload);pwaScanPort.close();}}catch(_){}
-          pwaScanPort=null;
-          // Secondary: reply to the exact requesting frame.
-          try{pwaScanRequester&&pwaScanRequester.postMessage(payload,'*')}catch(_){}
-          // Secondary: deliver to iframe and its Google wrapper descendants.
-          try{
-            const rootWin=document.getElementById('app').contentWindow;
-            rootWin.postMessage(payload,'*');
-            for(let i=0;i<rootWin.frames.length;i++){
-              try{rootWin.frames[i].postMessage(payload,'*')}catch(_){}
-            }
-          }catch(_){}
-          // Last-resort bridge for same-origin capable launch paths.
-          try{localStorage.setItem('unitrack_scan_result',JSON.stringify({value,requestId:pwaScanRequestId,ts:Date.now()}))}catch(_){}
-          pwaScanRequester=null;pwaScanRequestId='';
-        }
-      }catch(_){}
-      detecting=false;
-    },160);
+
+    // Native detector: fast QR + common 1D.
+    if('BarcodeDetector' in window){
+      let formats=[];try{formats=await BarcodeDetector.getSupportedFormats()}catch(_){}
+      const wanted=['code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','qr_code','data_matrix'];
+      const use=wanted.filter(x=>formats.includes(x));
+      const detector=use.length?new BarcodeDetector({formats:use}):new BarcodeDetector();
+      let detecting=false;
+      pwaScanTimer=setInterval(async()=>{
+        if(pwaDone||detecting||!pwaScanStream||video.readyState<2)return;
+        detecting=true;
+        try{
+          const rs=await detector.detect(video);
+          const hit=rs&&rs.find(x=>x&&x.rawValue);
+          if(hit)sendPwaScanResult(hit.rawValue);
+        }catch(_){}
+        detecting=false;
+      },110);
+    }
+
+    // Quagga2 in parallel for difficult 1D warehouse barcodes.
+    if(window.Quagga){
+      let qbusy=false;
+      const c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
+      pwaQuaggaTimer=setInterval(()=>{
+        if(pwaDone||qbusy||!pwaScanStream||video.readyState<2)return;
+        qbusy=true;
+        try{
+          const vw=video.videoWidth,vh=video.videoHeight,cw=Math.round(vw*.94),ch=Math.round(vh*.34);
+          c.width=1280;c.height=Math.max(360,Math.round(1280*ch/cw));
+          ctx.drawImage(video,(vw-cw)/2,(vh-ch)/2,cw,ch,0,0,c.width,c.height);
+          Quagga.decodeSingle({
+            src:c.toDataURL('image/jpeg',.92),numOfWorkers:0,locate:true,
+            inputStream:{size:1280,singleChannel:false},
+            decoder:{readers:['code_128_reader','code_39_reader','code_93_reader','ean_reader','ean_8_reader','upc_reader','upc_e_reader','i2of5_reader','2of5_reader','codabar_reader']},
+            locator:{patchSize:'medium',halfSample:false}
+          },r=>{qbusy=false;const v=r&&r.codeResult&&r.codeResult.code;if(v)sendPwaScanResult(v)});
+        }catch(_){qbusy=false}
+      },260);
+    }
   }catch(e){
     closePwaScanner();
-    // Let the Apps Script layer use its existing native-photo fallback.
-    const fb={type:'UNITRACK_SCAN_FALLBACK'};
-    try{if(pwaScanPort){pwaScanPort.postMessage(fb);pwaScanPort.close();}}catch(_){}
-    pwaScanPort=null;
-    const target=pwaScanRequester||document.getElementById('app').contentWindow;
-    try{target.postMessage(fb,'*')}catch(_){}
-    pwaScanRequester=null;
-  }finally{
-    pwaScanBusy=false;
-  }
+    const fb={type:'UNITRACK_SCAN_FALLBACK',requestId:pwaScanRequestId};
+    try{pwaScanRequester&&pwaScanRequester.postMessage(fb,'*')}catch(_){}
+  }finally{pwaScanBusy=false}
 }
 function closePwaScanner(){
   if(pwaScanTimer){clearInterval(pwaScanTimer);pwaScanTimer=null}
+  if(pwaQuaggaTimer){clearInterval(pwaQuaggaTimer);pwaQuaggaTimer=null}
   if(pwaScanStream){pwaScanStream.getTracks().forEach(t=>t.stop());pwaScanStream=null}
   const v=document.getElementById('pwaScanVideo');if(v)v.srcObject=null;
   const box=document.getElementById('pwaScanner');if(box)box.classList.remove('active');
+  pwaScanPort=null;pwaScanRequester=null;
 }
 window.addEventListener('message',ev=>{
   const d=ev.data||{};

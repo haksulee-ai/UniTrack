@@ -34,6 +34,19 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 @media (orientation: portrait) and (max-aspect-ratio:4/5){
   #changeUrl{right:112px!important}
 }
+
+#userBadge{display:none;position:fixed;left:12px;top:calc(8px + env(safe-area-inset-top));z-index:100002;height:34px;padding:0 11px;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:11px;font-weight:800;box-shadow:0 2px 8px #0003}
+#userOverlay{display:none;position:fixed;inset:0;z-index:200000;background:rgba(0,0,0,.48);align-items:center;justify-content:center;padding:20px}
+#userOverlay.show{display:flex}
+#userCard{width:min(92vw,420px);max-height:78vh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 12px 40px #0005}
+#userCard h3{margin:0 0 7px;font-size:20px;color:#075b9b}
+#userCard p{margin:0 0 14px;color:#666;font-size:13px}
+#userList{display:grid;gap:8px}
+#userList button{width:100%;padding:13px;border:1px solid #d7e5ef;border-radius:12px;background:#f8fbfd;font-size:16px;font-weight:800;text-align:left}
+#userManual{display:flex;gap:7px;margin-top:12px}
+#userManual input{min-width:0;flex:1;padding:11px;border:1px solid #ccc;border-radius:10px;font-size:16px}
+#userManual button{padding:0 14px;border:0;border-radius:10px;background:#075b9b;color:#fff;font-weight:800}
+
 </style>
 
 <style>
@@ -125,6 +138,17 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   <p class="small">배포 URL은 이 기기에만 저장됩니다.</p>
  </div>
 </div>
+
+<button id="userBadge" type="button" onclick="openUserRegistration(true)" title="사용자 변경">사용자</button>
+<div id="userOverlay">
+  <div id="userCard">
+    <h3>UniTrack 사용자 등록</h3>
+    <p>이 기기에서 작업할 이름을 선택하세요. 이후 신규등록과 구성정보변경의 Name에 자동 저장됩니다.</p>
+    <div id="userList"><div style="padding:12px;color:#777">사용자 목록 불러오는 중…</div></div>
+    <div id="userManual"><input id="userManualName" type="text" placeholder="목록에 없으면 이름 직접 입력"><button type="button" onclick="saveDeviceUser(document.getElementById('userManualName').value)">등록</button></div>
+  </div>
+</div>
+
 <button id="notifyBtn" type="button" onclick="enableNotifications()" title="알림 설정">🔔</button>
 <button id="changeUrl" type="button" onclick="changeConnection()">연결 주소 변경</button>
 <div id="pwaScanner">
@@ -429,6 +453,76 @@ window.addEventListener('message',ev=>{
     if(d)d.remove();
   });
 })();
+</script>
+
+
+<script>
+/* UniTrack V8 - per-device user registration */
+const UNITRACK_USER_KEY='unitrack_device_user_v1';
+let unitrackUserOptions=[];
+
+function currentDeviceUser(){
+  try{return (localStorage.getItem(UNITRACK_USER_KEY)||'').trim()}catch(_){return ''}
+}
+function postDeviceUser(){
+  const name=currentDeviceUser();
+  const f=document.getElementById('app')||document.querySelector('iframe');
+  if(f&&f.contentWindow){
+    try{f.contentWindow.postMessage({type:'UNITRACK_DEVICE_USER',name:name},'*')}catch(_){}
+  }
+  const b=document.getElementById('userBadge');
+  if(b){b.textContent=name?'👤 '+name:'👤 사용자 등록';b.style.display='block'}
+}
+function requestUserOptions(){
+  const f=document.getElementById('app')||document.querySelector('iframe');
+  if(f&&f.contentWindow){
+    try{f.contentWindow.postMessage({type:'UNITRACK_REQUEST_NAME_OPTIONS'},'*')}catch(_){}
+  }
+}
+function renderUserOptions(){
+  const box=document.getElementById('userList'); if(!box)return;
+  if(!unitrackUserOptions.length){
+    box.innerHTML='<div style="padding:12px;color:#777">기존 Name 목록을 불러오지 못했습니다. 아래에서 이름을 직접 입력할 수 있습니다.</div>';
+    return;
+  }
+  box.innerHTML=unitrackUserOptions.map(n=>'<button type="button" data-user-name></button>').join('');
+  [...box.querySelectorAll('[data-user-name]')].forEach((b,i)=>{
+    b.textContent=unitrackUserOptions[i];
+    b.onclick=()=>saveDeviceUser(unitrackUserOptions[i]);
+  });
+}
+function openUserRegistration(force){
+  const o=document.getElementById('userOverlay'); if(!o)return;
+  o.classList.add('show');
+  requestUserOptions();
+  if(force) setTimeout(requestUserOptions,500);
+}
+function saveDeviceUser(name){
+  name=String(name||'').trim();
+  if(!name){alert('사용자 이름을 선택하거나 입력해주세요.');return}
+  try{localStorage.setItem(UNITRACK_USER_KEY,name)}catch(_){}
+  document.getElementById('userOverlay').classList.remove('show');
+  postDeviceUser();
+}
+window.addEventListener('message',function(ev){
+  const d=ev.data||{};
+  if(d.type==='UNITRACK_APP_READY_FOR_USER'){
+    postDeviceUser();
+    requestUserOptions();
+    if(!currentDeviceUser()) openUserRegistration(false);
+  }
+  if(d.type==='UNITRACK_NAME_OPTIONS'){
+    unitrackUserOptions=[...new Set((d.names||[]).map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
+    renderUserOptions();
+  }
+});
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    postDeviceUser();
+    if(!currentDeviceUser()) openUserRegistration(false);
+    requestUserOptions();
+  },900);
+});
 </script>
 
 </body></html>

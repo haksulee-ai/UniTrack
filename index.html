@@ -47,6 +47,32 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 #userManual input{min-width:0;flex:1;padding:11px;border:1px solid #ccc;border-radius:10px;font-size:16px}
 #userManual button{padding:0 14px;border:0;border-radius:10px;background:#075b9b;color:#fff;font-weight:800}
 
+
+/* V8.1 사용자 직접입력 가독성 */
+#userManual{display:grid!important;grid-template-columns:minmax(0,1fr) 76px!important;gap:8px!important;width:100%!important;margin-top:14px!important}
+#userManual input{
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  height:50px!important;
+  padding:0 14px!important;
+  border:1px solid #aebbc5!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  color:#111!important;
+  -webkit-text-fill-color:#111!important;
+  caret-color:#111!important;
+  font-size:17px!important;
+  font-weight:700!important;
+  line-height:50px!important;
+  opacity:1!important;
+}
+#userManual input::placeholder{color:#8a8f94!important;-webkit-text-fill-color:#8a8f94!important;font-size:14px!important;font-weight:500!important}
+#userManual button{height:50px!important;padding:0 12px!important;font-size:15px!important;white-space:nowrap!important}
+@media (max-width:430px){
+  #userCard{width:calc(100vw - 24px)!important;padding:18px 14px!important;box-sizing:border-box!important}
+}
+
 </style>
 
 <style>

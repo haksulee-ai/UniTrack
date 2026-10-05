@@ -73,6 +73,30 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   #userCard{width:calc(100vw - 24px)!important;padding:18px 14px!important;box-sizing:border-box!important}
 }
 
+
+/* V8.3 compact user icon + aligned registration row */
+#userBadge{
+  display:none;position:fixed;z-index:100002;
+  width:36px!important;height:36px!important;padding:0!important;
+  border:1px solid #075b9b!important;border-radius:50%!important;
+  background:#fff!important;color:#075b9b!important;
+  font-size:0!important;font-weight:800!important;
+  box-shadow:0 2px 8px #0003!important;
+}
+#userBadge::before{content:'👤';font-size:19px;line-height:34px}
+#userManual{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 76px!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+#userManual input,#userManual button{
+  box-sizing:border-box!important;
+  height:50px!important;
+  margin:0!important;
+  align-self:center!important;
+}
+
 </style>
 
 <style>
@@ -197,21 +221,27 @@ function openApp(u){
  const f=document.getElementById('app');f.style.display='block';f.src=u;
 }
 function changeConnection(){
- const current=localStorage.getItem(KEY)||'';
- const f=document.getElementById('app');f.src='about:blank';f.style.display='none';
- document.getElementById('changeUrl').style.display='none';
- document.getElementById('notifyBtn').style.display='none';
- document.getElementById('setup').style.display='flex';
- const input=document.getElementById('url');input.value=current;input.focus();input.select();
+ const current=localStorage.getItem(KEY)||DEFAULT_APP_URL;
+ const u=prompt('Apps Script 웹앱 /exec 연결주소를 입력하세요.',current);
+ if(u===null)return;
+ const v=String(u).trim();
+ if(!valid(v)){alert('Apps Script 웹앱 /exec 주소를 확인해주세요.');return}
+ try{localStorage.setItem(KEY,v)}catch(_){}
+ openApp(v);
+ postDeviceUser();
 }
 function saveAndOpen(){
  const u=document.getElementById('url').value.trim();
  if(!valid(u)){alert('Apps Script 웹앱 /exec 주소를 입력해주세요.');return}
  localStorage.setItem(KEY,u);openApp(u);
 }
-let saved=DEFAULT_APP_URL;
-try{localStorage.setItem(KEY,DEFAULT_APP_URL)}catch(_){}
-openApp(DEFAULT_APP_URL);
+let saved='';
+try{saved=localStorage.getItem(KEY)||''}catch(_){}
+if(!valid(saved)){
+ saved=DEFAULT_APP_URL;
+ try{localStorage.setItem(KEY,saved)}catch(_){}
+}
+openApp(saved);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
 </script>
 <script>
@@ -444,10 +474,15 @@ window.addEventListener('message',ev=>{
 (function(){
   const FIXED='https://script.google.com/macros/s/AKfycby94pRfhnMGDxpsgcbzexB7-HjPHKGAmhZkg7MnQFTot7CGCXUSP-LIi-kRDUSwfOCv/exec';
   function bootUniTrack(){
-    try{localStorage.setItem('unitrack_apps_script_url',FIXED);}catch(e){}
+    let target=FIXED;
+    try{
+      const x=localStorage.getItem('unitrack_apps_script_url')||'';
+      if(/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test(x.trim())) target=x.trim();
+      else localStorage.setItem('unitrack_apps_script_url',FIXED);
+    }catch(e){}
     const f=document.getElementById('app') || document.querySelector('iframe');
     if(!f) return;
-    if(f.getAttribute('src')!==FIXED) f.setAttribute('src',FIXED);
+    if(f.getAttribute('src')!==target) f.setAttribute('src',target);
     f.style.display='block';
   }
   if(document.readyState==='loading'){
@@ -497,8 +532,25 @@ function postDeviceUser(){
     try{f.contentWindow.postMessage({type:'UNITRACK_DEVICE_USER',name:name},'*')}catch(_){}
   }
   const b=document.getElementById('userBadge');
-  if(b){b.textContent=name?'👤 '+name:'👤 사용자 등록';b.style.display='block'}
+  if(b){b.textContent='';b.title=name?('사용자 : '+name+' (변경)'):'사용자 등록';b.setAttribute('aria-label',b.title);b.style.display='block';placeUserButton();}
 }
+
+function placeUserButton(){
+  const u=document.getElementById('userBadge');
+  const n=document.getElementById('notifyBtn');
+  const c=document.getElementById('changeUrl');
+  if(!u)return;
+  const anchor=(n&&n.offsetParent!==null)?n:c;
+  if(!anchor)return;
+  const r=anchor.getBoundingClientRect();
+  const w=36;
+  u.style.left=Math.max(6,r.left-w-7)+'px';
+  u.style.top=(r.top+(r.height-w)/2)+'px';
+  u.style.right='auto';
+}
+window.addEventListener('resize',()=>setTimeout(placeUserButton,50));
+window.addEventListener('orientationchange',()=>setTimeout(placeUserButton,180));
+
 function requestUserOptions(){
   const f=document.getElementById('app')||document.querySelector('iframe');
   if(f&&f.contentWindow){

@@ -91,7 +91,7 @@ if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.ser
 </script>
 
 <script>
-let pwaScanStream=null,pwaScanTimer=null,pwaScanBusy=false,pwaScanRequester=null;
+let pwaScanStream=null,pwaScanTimer=null,pwaScanBusy=false,pwaScanRequester=null,pwaScanRequestId='';
 async function openPwaScanner(){
   if(pwaScanBusy)return;
   pwaScanBusy=true;
@@ -119,9 +119,20 @@ async function openPwaScanner(){
           const value=String(rs[0].rawValue).trim();
           try{navigator.vibrate&&navigator.vibrate([80,35,80])}catch(_){}
           closePwaScanner();
-          const target=pwaScanRequester||document.getElementById('app').contentWindow;
-          try{target.postMessage({type:'UNITRACK_SCAN_RESULT',value},'*')}catch(_){}
-          pwaScanRequester=null;
+          const payload={type:'UNITRACK_SCAN_RESULT',value,requestId:pwaScanRequestId};
+          // Primary: reply to the exact requesting frame.
+          try{pwaScanRequester&&pwaScanRequester.postMessage(payload,'*')}catch(_){}
+          // Secondary: deliver to iframe and its Google wrapper descendants.
+          try{
+            const rootWin=document.getElementById('app').contentWindow;
+            rootWin.postMessage(payload,'*');
+            for(let i=0;i<rootWin.frames.length;i++){
+              try{rootWin.frames[i].postMessage(payload,'*')}catch(_){}
+            }
+          }catch(_){}
+          // Last-resort bridge for same-origin capable launch paths.
+          try{localStorage.setItem('unitrack_scan_result',JSON.stringify({value,requestId:pwaScanRequestId,ts:Date.now()}))}catch(_){}
+          pwaScanRequester=null;pwaScanRequestId='';
         }
       }catch(_){}
       detecting=false;
@@ -144,7 +155,7 @@ function closePwaScanner(){
 }
 window.addEventListener('message',ev=>{
   const d=ev.data||{};
-  if(d.type==='UNITRACK_SCAN_REQUEST'){pwaScanRequester=ev.source;openPwaScanner();}
+  if(d.type==='UNITRACK_SCAN_REQUEST'){pwaScanRequester=ev.source;pwaScanRequestId=d.requestId||'';openPwaScanner();}
 });
 </script>
 </body></html>

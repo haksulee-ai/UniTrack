@@ -16,13 +16,11 @@ html,body{margin:0;width:100%;height:100%;background:#fff;font-family:Arial,"Not
 h1{font-size:32px;margin:10px 0}p{font-size:18px;line-height:1.5;color:#555}
 input{box-sizing:border-box;width:100%;height:58px;font-size:18px;padding:0 14px;border:1px solid #bbb;border-radius:12px}
 button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;background:#075b9b;color:#fff;font-size:22px;font-weight:800}
-#app{display:none;position:fixed;inset:0;width:100vw;height:100dvh;border:0;z-index:1;pointer-events:auto!important;touch-action:auto!important;background:#fff}
-#notifyBtn{display:none;position:fixed;right:190px;top:calc(8px + env(safe-area-inset-top));z-index:100000;width:50px;height:34px;margin:0;padding:0;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:16px;font-weight:800;box-shadow:0 2px 8px #0003}
+#app{display:none;width:100%;height:100%;border:0}
 #changeUrl{display:none;position:fixed;right:66px;left:auto;top:calc(8px + env(safe-area-inset-top));z-index:99999;width:auto;height:34px;margin:0;padding:0 10px;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:11px;font-weight:800;box-shadow:0 2px 8px #0003;white-space:nowrap}
 .small{font-size:14px;color:#777}
 
-#pwaScanner{display:none;position:fixed;inset:0;z-index:200000;background:#000;pointer-events:none}
-#pwaScanner.active{pointer-events:auto}
+#pwaScanner{display:none;position:fixed;inset:0;z-index:200000;background:#000}
 #pwaScanner.active{display:block}
 #pwaScanVideo{width:100%;height:100%;object-fit:cover;background:#000}
 #pwaScanShade{position:absolute;inset:0;background:rgba(0,0,0,.08);pointer-events:none}
@@ -35,7 +33,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 @media (orientation: portrait) and (max-aspect-ratio:4/5){
   #changeUrl{right:112px!important}
 }
-#userBtn{display:none;position:fixed;z-index:100003;width:36px;height:36px;padding:0;border:1px solid #075b9b;border-radius:50%;background:#fff;font-size:18px;line-height:34px;text-align:center;box-shadow:0 2px 8px #0003}#utUserOverlay{display:none;pointer-events:none;position:fixed;inset:0;z-index:200000;background:rgba(0,0,0,.48);align-items:center;justify-content:center;padding:18px}#utUserOverlay.show{display:flex;pointer-events:auto}#utUserCard{box-sizing:border-box;width:min(92vw,420px);background:#fff;border-radius:18px;padding:18px}#utUserCard h3{margin:0 0 8px;font-size:20px;color:#075b9b}#utUserCard p{margin:0 0 12px;font-size:13px;color:#666}#utUserList{display:grid;gap:7px;max-height:36vh;overflow:auto}#utUserList button{height:44px;border:1px solid #d7e5ef;border-radius:10px;background:#f8fbfd;font-size:16px;font-weight:700;text-align:left;padding:0 12px}#utUserManual{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:8px;align-items:center;margin-top:12px}#utUserManual input,#utUserManual button{box-sizing:border-box;height:48px;margin:0;border-radius:10px}#utUserManual input{width:100%;min-width:0;padding:0 12px;border:1px solid #aaa;font-size:16px;color:#111;background:#fff}#utUserManual button{border:0;background:#075b9b;color:#fff;font-size:15px;font-weight:800}</style>
+</style>
 
 <style>
 /* v7.14.24: portrait only.
@@ -126,7 +124,6 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   <p class="small">배포 URL은 이 기기에만 저장됩니다.</p>
  </div>
 </div>
-<button id="userBtn" type="button" onclick="openUtUser()">👤</button><div id="utUserOverlay"><div id="utUserCard"><h3>UniTrack 사용자 등록</h3><p>이 기기에서 작업할 이름을 선택하세요.</p><div id="utUserList"><div style="padding:10px;color:#777">사용자 목록 불러오는 중…</div></div><div id="utUserManual"><input id="utUserInput" type="text" placeholder="이름 직접 입력"><button type="button" onclick="saveUtUser(document.getElementById('utUserInput').value)">등록</button></div></div></div><button id="notifyBtn" type="button" onclick="enableNotifications()" title="알림 설정">🔔</button>
 <button id="changeUrl" type="button" onclick="changeConnection()">연결 주소 변경</button>
 <div id="pwaScanner">
   <video id="pwaScanVideo" playsinline autoplay muted></video>
@@ -138,104 +135,27 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 <iframe id="app" allow="camera *; microphone *; clipboard-read *; clipboard-write *" allowfullscreen></iframe>
 <script>
 const KEY='unitrack_apps_script_url';
-const DEFAULT_APP_URL='https://script.google.com/macros/s/AKfycby94pRfhnMGDxpsgcbzexB7-HjPHKGAmhZkg7MnQFTot7CGCXUSP-LIi-kRDUSwfOCv/exec';
 function valid(u){return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test((u||'').trim())}
-function withDeviceUser(u){try{const n=(localStorage.getItem('unitrack_device_user_v1')||'').trim();if(!n)return u;const x=new URL(u);x.searchParams.set('deviceUser',n);return x.toString()}catch(_){return u}}
 function openApp(u){
- const setup=document.getElementById('setup');
- setup.style.display='none';
- setup.style.pointerEvents='none';
+ document.getElementById('setup').style.display='none';
  document.getElementById('changeUrl').style.display='block';
- document.getElementById('notifyBtn').style.display='block';
- setTimeout(placeNotifyButton,0);
- const f=document.getElementById('app');
- f.style.display='block';
- f.style.pointerEvents='auto';
- f.style.touchAction='auto';
- f.src=u;
+ const f=document.getElementById('app');f.style.display='block';f.src=u;
 }
-function changeConnection(){const current=localStorage.getItem(KEY)||DEFAULT_APP_URL;const u=prompt('Apps Script 웹앱 /exec 연결주소를 입력하세요.',current);if(u===null)return;const v=String(u).trim();if(!valid(v)){alert('Apps Script 웹앱 /exec 주소를 확인해주세요.');return}try{localStorage.setItem(KEY,v)}catch(_){}openApp(withDeviceUser(v));}
+function changeConnection(){
+ const current=localStorage.getItem(KEY)||'';
+ const f=document.getElementById('app');f.src='about:blank';f.style.display='none';
+ document.getElementById('changeUrl').style.display='none';
+ document.getElementById('setup').style.display='flex';
+ const input=document.getElementById('url');input.value=current;input.focus();input.select();
+}
 function saveAndOpen(){
  const u=document.getElementById('url').value.trim();
  if(!valid(u)){alert('Apps Script 웹앱 /exec 주소를 입력해주세요.');return}
  localStorage.setItem(KEY,u);openApp(u);
 }
-let saved='';
-try{saved=localStorage.getItem(KEY)||''}catch(_){}
-if(!valid(saved)){saved=DEFAULT_APP_URL;try{localStorage.setItem(KEY,saved)}catch(_){}}
-openApp(withDeviceUser(saved));
+const saved=localStorage.getItem(KEY);
+if(saved&&valid(saved))openApp(saved);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
-</script>
-<script>
-
-
-function placeNotifyButton(){
-  const b=document.getElementById('notifyBtn'), c=document.getElementById('changeUrl');
-  if(!b||!c||getComputedStyle(c).display==='none')return;
-  // Let the existing responsive CSS determine the connection button's horizontal position.
-  // Use its rendered center as the shared vertical center.
-  b.style.setProperty('right','auto','important');
-  b.style.setProperty('bottom','auto','important');
-  const r=c.getBoundingClientRect();
-  const cy=r.top+r.height/2;
-  b.style.setProperty('left',Math.max(8,r.left-b.offsetWidth-8)+'px','important');
-  b.style.setProperty('top',(cy-b.offsetHeight/2)+'px','important');
-  c.style.setProperty('top',(cy-c.offsetHeight/2)+'px','important');
-}
-window.addEventListener('resize',placeNotifyButton);
-window.addEventListener('orientationchange',()=>setTimeout(placeNotifyButton,150));
-setTimeout(placeNotifyButton,250);
-
-async function enableNotifications(){
-  if(!('Notification' in window)){alert('이 기기/브라우저는 웹 알림을 지원하지 않습니다.');return}
-  let p=Notification.permission;
-  if(p!=='granted') p=await Notification.requestPermission();
-  if(p!=='granted'){alert('UniTrack 알림 권한이 허용되지 않았습니다.');return}
-  localStorage.setItem('unitrack_notify_enabled','1');
-  const reg=await navigator.serviceWorker.ready;
-  await reg.showNotification('UniTrack 알림 테스트',{
-    body:'알림 연결 완료 · 통합시트 기록 시 알림을 표시합니다.',
-    icon:'./icon-192.png',badge:'./icon-192.png',tag:'unitrack-test',renotify:true
-  });
-}
-let lastMovementNoticeKey='',lastMovementNoticeAt=0;
-async function showMovementNotification(d){
-  if(localStorage.getItem('unitrack_notify_enabled')!=='1')return;
-  const noticeKey=[d.savedAt||'',d.barcode||'',d.serial||'',d.toStatus||''].join('|');
-  const now=Date.now();
-  if(noticeKey && noticeKey===lastMovementNoticeKey && now-lastMovementNoticeAt<2500)return;
-  lastMovementNoticeKey=noticeKey; lastMovementNoticeAt=now;
-  if(!('Notification' in window)||Notification.permission!=='granted')return;
-  const unit=String(d.unit||'-');
-  const fromStatus=String(d.fromStatus||'').trim();
-  const toStatus=String(d.toStatus||'통합시트 기록').trim();
-  const statusText=(fromStatus && fromStatus!==toStatus) ? (fromStatus+' → '+toStatus) : toStatus;
-  const barcode=String(d.barcode||'-');
-  const serial=String(d.serial||'-');
-  const savedAt=String(d.savedAt||new Date().toLocaleString('ko-KR'));
-  const name=String(d.name||'-');
-  const body=[
-    'Unit : '+unit,
-    '변경상태 : '+statusText,
-    'SKT바코드 : '+barcode,
-    'Serial No. : '+serial,
-    '날짜/시간 : '+savedAt,
-    '처리자 : '+name
-  ].join('\n');
-  try{
-    const reg=await navigator.serviceWorker.ready;
-    await reg.showNotification('UniTrack 유동기록',{
-      body:body,icon:'./icon-192.png',badge:'./icon-192.png',
-      tag:'unitrack-v4-movement-'+Date.now(),renotify:true,data:{url:location.href}
-    });
-    if(navigator.vibrate)navigator.vibrate([100,50,100]);
-  }catch(_){}
-}
-window.addEventListener('message',function(e){
-  const d=e.data||{};
-  if(d.type==='UNITRACK_MOVEMENT_SAVED') showMovementNotification(d);
-});
-
 </script>
 
 <script>
@@ -391,15 +311,4 @@ window.addEventListener('message',ev=>{
   },true);
 })();
 </script>
-<script>
-const UT_USER_KEY='unitrack_device_user_v1';let utNames=[];
-function utUser(){try{return(localStorage.getItem(UT_USER_KEY)||'').trim()}catch(_){return''}}
-function placeUtUser(){const b=document.getElementById('userBtn'),n=document.getElementById('notifyBtn');if(!b||!n)return;const r=n.getBoundingClientRect(),w=36,g=7;b.style.left=(r.right+g)+'px';b.style.top=(r.top+(r.height-w)/2)+'px';b.style.right='auto';b.style.display='block'}
-function sendUtUser(){const f=document.getElementById('app');if(f&&f.contentWindow)try{f.contentWindow.postMessage({type:'UNITRACK_DEVICE_USER',name:utUser()},'*')}catch(_){}}
-function reqUtNames(){const f=document.getElementById('app');if(f&&f.contentWindow)try{f.contentWindow.postMessage({type:'UNITRACK_REQUEST_NAME_OPTIONS'},'*')}catch(_){}}
-function renderUtNames(){const box=document.getElementById('utUserList');if(!box)return;if(!utNames.length){box.innerHTML='<div style="padding:10px;color:#777">목록이 없으면 아래에 이름을 직접 입력하세요.</div>';return}box.innerHTML='';utNames.forEach(n=>{const b=document.createElement('button');b.type='button';b.textContent=n;b.onclick=()=>saveUtUser(n);box.appendChild(b)})}
-function openUtUser(){document.getElementById('utUserOverlay').classList.add('show');reqUtNames()}
-function saveUtUser(n){n=String(n||'').trim();if(!n){alert('이름을 입력해주세요.');return}try{localStorage.setItem(UT_USER_KEY,n)}catch(_){}document.getElementById('utUserOverlay').classList.remove('show');sendUtUser();const base=localStorage.getItem(KEY)||DEFAULT_APP_URL;openApp(withDeviceUser(base))}
-window.addEventListener('message',ev=>{const d=ev.data||{};if(d.type==='UNITRACK_APP_READY_FOR_USER'){sendUtUser();reqUtNames();if(!utUser())openUtUser()}if(d.type==='UNITRACK_NAME_OPTIONS'){utNames=[...new Set((d.names||[]).map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));renderUtNames()}});
-window.addEventListener('load',()=>setTimeout(()=>{placeUtUser();sendUtUser();if(!utUser())openUtUser()},700));window.addEventListener('resize',()=>setTimeout(placeUtUser,80));window.addEventListener('orientationchange',()=>setTimeout(placeUtUser,220));
-</script></body></html>
+</body></html>

@@ -16,12 +16,13 @@ html,body{margin:0;width:100%;height:100%;background:#fff;font-family:Arial,"Not
 h1{font-size:32px;margin:10px 0}p{font-size:18px;line-height:1.5;color:#555}
 input{box-sizing:border-box;width:100%;height:58px;font-size:18px;padding:0 14px;border:1px solid #bbb;border-radius:12px}
 button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;background:#075b9b;color:#fff;font-size:22px;font-weight:800}
-#app{display:none;width:100%;height:100%;border:0}
+#app{display:none;position:fixed;inset:0;width:100vw;height:100dvh;border:0;z-index:1;pointer-events:auto!important;touch-action:auto!important;background:#fff}
 #notifyBtn{display:none;position:fixed;right:190px;top:calc(8px + env(safe-area-inset-top));z-index:100000;width:50px;height:34px;margin:0;padding:0;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:16px;font-weight:800;box-shadow:0 2px 8px #0003}
 #changeUrl{display:none;position:fixed;right:66px;left:auto;top:calc(8px + env(safe-area-inset-top));z-index:99999;width:auto;height:34px;margin:0;padding:0 10px;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:11px;font-weight:800;box-shadow:0 2px 8px #0003;white-space:nowrap}
 .small{font-size:14px;color:#777}
 
-#pwaScanner{display:none;position:fixed;inset:0;z-index:200000;background:#000}
+#pwaScanner{display:none;position:fixed;inset:0;z-index:200000;background:#000;pointer-events:none}
+#pwaScanner.active{pointer-events:auto}
 #pwaScanner.active{display:block}
 #pwaScanVideo{width:100%;height:100%;object-fit:cover;background:#000}
 #pwaScanShade{position:absolute;inset:0;background:rgba(0,0,0,.08);pointer-events:none}
@@ -34,7 +35,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 @media (orientation: portrait) and (max-aspect-ratio:4/5){
   #changeUrl{right:112px!important}
 }
-#userBtn{display:none;position:fixed;z-index:100003;width:36px;height:36px;padding:0;border:1px solid #075b9b;border-radius:50%;background:#fff;font-size:18px;line-height:34px;text-align:center;box-shadow:0 2px 8px #0003}#utUserOverlay{display:none;position:fixed;inset:0;z-index:200000;background:rgba(0,0,0,.48);align-items:center;justify-content:center;padding:18px}#utUserOverlay.show{display:flex}#utUserCard{box-sizing:border-box;width:min(92vw,420px);background:#fff;border-radius:18px;padding:18px}#utUserCard h3{margin:0 0 8px;font-size:20px;color:#075b9b}#utUserCard p{margin:0 0 12px;font-size:13px;color:#666}#utUserList{display:grid;gap:7px;max-height:36vh;overflow:auto}#utUserList button{height:44px;border:1px solid #d7e5ef;border-radius:10px;background:#f8fbfd;font-size:16px;font-weight:700;text-align:left;padding:0 12px}#utUserManual{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:8px;align-items:center;margin-top:12px}#utUserManual input,#utUserManual button{box-sizing:border-box;height:48px;margin:0;border-radius:10px}#utUserManual input{width:100%;min-width:0;padding:0 12px;border:1px solid #aaa;font-size:16px;color:#111;background:#fff}#utUserManual button{border:0;background:#075b9b;color:#fff;font-size:15px;font-weight:800}</style>
+#userBtn{display:none;position:fixed;z-index:100003;width:36px;height:36px;padding:0;border:1px solid #075b9b;border-radius:50%;background:#fff;font-size:18px;line-height:34px;text-align:center;box-shadow:0 2px 8px #0003}#utUserOverlay{display:none;pointer-events:none;position:fixed;inset:0;z-index:200000;background:rgba(0,0,0,.48);align-items:center;justify-content:center;padding:18px}#utUserOverlay.show{display:flex;pointer-events:auto}#utUserCard{box-sizing:border-box;width:min(92vw,420px);background:#fff;border-radius:18px;padding:18px}#utUserCard h3{margin:0 0 8px;font-size:20px;color:#075b9b}#utUserCard p{margin:0 0 12px;font-size:13px;color:#666}#utUserList{display:grid;gap:7px;max-height:36vh;overflow:auto}#utUserList button{height:44px;border:1px solid #d7e5ef;border-radius:10px;background:#f8fbfd;font-size:16px;font-weight:700;text-align:left;padding:0 12px}#utUserManual{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:8px;align-items:center;margin-top:12px}#utUserManual input,#utUserManual button{box-sizing:border-box;height:48px;margin:0;border-radius:10px}#utUserManual input{width:100%;min-width:0;padding:0 12px;border:1px solid #aaa;font-size:16px;color:#111;background:#fff}#utUserManual button{border:0;background:#075b9b;color:#fff;font-size:15px;font-weight:800}</style>
 
 <style>
 /* v7.14.24: portrait only.
@@ -141,11 +142,17 @@ const DEFAULT_APP_URL='https://script.google.com/macros/s/AKfycby94pRfhnMGDxpsgc
 function valid(u){return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test((u||'').trim())}
 function withDeviceUser(u){try{const n=(localStorage.getItem('unitrack_device_user_v1')||'').trim();if(!n)return u;const x=new URL(u);x.searchParams.set('deviceUser',n);return x.toString()}catch(_){return u}}
 function openApp(u){
- document.getElementById('setup').style.display='none';
+ const setup=document.getElementById('setup');
+ setup.style.display='none';
+ setup.style.pointerEvents='none';
  document.getElementById('changeUrl').style.display='block';
  document.getElementById('notifyBtn').style.display='block';
  setTimeout(placeNotifyButton,0);
- const f=document.getElementById('app');f.style.display='block';f.src=u;
+ const f=document.getElementById('app');
+ f.style.display='block';
+ f.style.pointerEvents='auto';
+ f.style.touchAction='auto';
+ f.src=u;
 }
 function changeConnection(){const current=localStorage.getItem(KEY)||DEFAULT_APP_URL;const u=prompt('Apps Script 웹앱 /exec 연결주소를 입력하세요.',current);if(u===null)return;const v=String(u).trim();if(!valid(v)){alert('Apps Script 웹앱 /exec 주소를 확인해주세요.');return}try{localStorage.setItem(KEY,v)}catch(_){}openApp(withDeviceUser(v));}
 function saveAndOpen(){

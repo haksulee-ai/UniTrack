@@ -201,18 +201,20 @@ function utInitControls(){
  document.getElementById('utConnectBtn').onclick=()=>document.getElementById('changeUrl')?.click();
  const utGoMainPage=()=>{
    const f=document.getElementById('app');
-   if(!f)return;
-   const send=()=>{try{
-     f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');
-     f.contentWindow.postMessage({type:'UNITRACK_NAV_MAIN'},'*');
-   }catch(_){}};
-   send(); setTimeout(send,80); setTimeout(send,220);
-   // Cross-frame fallback: same Apps Script URL, only hash changes; no reload/camera permission reset.
+   const base=localStorage.getItem(KEY)||'';
+   if(!f||!base)return;
    try{
-     const u=new URL(f.src);
-     u.hash='unitrack-main';
+     const u=new URL(base);
+     const user=utUser();
+     if(user)u.searchParams.set('deviceUser',user);
+     u.searchParams.set('unitrackView','main');
+     // force a real navigation even if the user is already on the same URL
+     u.searchParams.set('_utnav',String(Date.now()));
      f.src=u.toString();
-   }catch(_){}
+   }catch(_){
+     // legacy message fallback
+     try{f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');}catch(__){}
+   }
  };
  document.getElementById('utHomeBtn').onclick=utGoMainPage;
  bb.onclick=async()=>{

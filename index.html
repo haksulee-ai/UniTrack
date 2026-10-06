@@ -34,70 +34,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 @media (orientation: portrait) and (max-aspect-ratio:4/5){
   #changeUrl{right:112px!important}
 }
-
-#userBadge{display:none;position:fixed;left:12px;top:calc(8px + env(safe-area-inset-top));z-index:100002;height:34px;padding:0 11px;border:1px solid #075b9b;border-radius:18px;background:#fff;color:#075b9b;font-size:11px;font-weight:800;box-shadow:0 2px 8px #0003}
-#userOverlay{display:none;position:fixed;inset:0;z-index:200000;background:rgba(0,0,0,.48);align-items:center;justify-content:center;padding:20px}
-#userOverlay.show{display:flex}
-#userCard{width:min(92vw,420px);max-height:78vh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 12px 40px #0005}
-#userCard h3{margin:0 0 7px;font-size:20px;color:#075b9b}
-#userCard p{margin:0 0 14px;color:#666;font-size:13px}
-#userList{display:grid;gap:8px}
-#userList button{width:100%;padding:13px;border:1px solid #d7e5ef;border-radius:12px;background:#f8fbfd;font-size:16px;font-weight:800;text-align:left}
-#userManual{display:flex;gap:7px;margin-top:12px}
-#userManual input{min-width:0;flex:1;padding:11px;border:1px solid #ccc;border-radius:10px;font-size:16px}
-#userManual button{padding:0 14px;border:0;border-radius:10px;background:#075b9b;color:#fff;font-weight:800}
-
-
-/* V8.1 사용자 직접입력 가독성 */
-#userManual{display:grid!important;grid-template-columns:minmax(0,1fr) 76px!important;gap:8px!important;width:100%!important;margin-top:14px!important}
-#userManual input{
-  box-sizing:border-box!important;
-  width:100%!important;
-  min-width:0!important;
-  height:50px!important;
-  padding:0 14px!important;
-  border:1px solid #aebbc5!important;
-  border-radius:11px!important;
-  background:#fff!important;
-  color:#111!important;
-  -webkit-text-fill-color:#111!important;
-  caret-color:#111!important;
-  font-size:17px!important;
-  font-weight:700!important;
-  line-height:50px!important;
-  opacity:1!important;
-}
-#userManual input::placeholder{color:#8a8f94!important;-webkit-text-fill-color:#8a8f94!important;font-size:14px!important;font-weight:500!important}
-#userManual button{height:50px!important;padding:0 12px!important;font-size:15px!important;white-space:nowrap!important}
-@media (max-width:430px){
-  #userCard{width:calc(100vw - 24px)!important;padding:18px 14px!important;box-sizing:border-box!important}
-}
-
-
-/* V8.3 compact user icon + aligned registration row */
-#userBadge{
-  display:none;position:fixed;z-index:100002;
-  width:36px!important;height:36px!important;padding:0!important;
-  border:1px solid #075b9b!important;border-radius:50%!important;
-  background:#fff!important;color:#075b9b!important;
-  font-size:0!important;font-weight:800!important;
-  box-shadow:0 2px 8px #0003!important;
-}
-#userBadge::before{content:'👤';font-size:19px;line-height:34px}
-#userManual{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 76px!important;
-  align-items:center!important;
-  gap:8px!important;
-}
-#userManual input,#userManual button{
-  box-sizing:border-box!important;
-  height:50px!important;
-  margin:0!important;
-  align-self:center!important;
-}
-
-</style>
+#userBtn{display:none;position:fixed;z-index:100003;width:36px;height:36px;padding:0;border:1px solid #075b9b;border-radius:50%;background:#fff;font-size:18px;line-height:34px;text-align:center;box-shadow:0 2px 8px #0003}#utUserOverlay{display:none;position:fixed;inset:0;z-index:200000;background:rgba(0,0,0,.48);align-items:center;justify-content:center;padding:18px}#utUserOverlay.show{display:flex}#utUserCard{box-sizing:border-box;width:min(92vw,420px);background:#fff;border-radius:18px;padding:18px}#utUserCard h3{margin:0 0 8px;font-size:20px;color:#075b9b}#utUserCard p{margin:0 0 12px;font-size:13px;color:#666}#utUserList{display:grid;gap:7px;max-height:36vh;overflow:auto}#utUserList button{height:44px;border:1px solid #d7e5ef;border-radius:10px;background:#f8fbfd;font-size:16px;font-weight:700;text-align:left;padding:0 12px}#utUserManual{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:8px;align-items:center;margin-top:12px}#utUserManual input,#utUserManual button{box-sizing:border-box;height:48px;margin:0;border-radius:10px}#utUserManual input{width:100%;min-width:0;padding:0 12px;border:1px solid #aaa;font-size:16px;color:#111;background:#fff}#utUserManual button{border:0;background:#075b9b;color:#fff;font-size:15px;font-weight:800}</style>
 
 <style>
 /* v7.14.24: portrait only.
@@ -188,18 +125,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   <p class="small">배포 URL은 이 기기에만 저장됩니다.</p>
  </div>
 </div>
-
-<button id="userBadge" type="button" onclick="openUserRegistration(true)" title="사용자 변경">사용자</button>
-<div id="userOverlay">
-  <div id="userCard">
-    <h3>UniTrack 사용자 등록</h3>
-    <p>이 기기에서 작업할 이름을 선택하세요. 이후 신규등록과 구성정보변경의 Name에 자동 저장됩니다.</p>
-    <div id="userList"><div style="padding:12px;color:#777">사용자 목록 불러오는 중…</div></div>
-    <div id="userManual"><input id="userManualName" type="text" placeholder="목록에 없으면 이름 직접 입력"><button type="button" onclick="saveDeviceUser(document.getElementById('userManualName').value)">등록</button></div>
-  </div>
-</div>
-
-<button id="notifyBtn" type="button" onclick="enableNotifications()" title="알림 설정">🔔</button>
+<button id="userBtn" type="button" onclick="openUtUser()">👤</button><div id="utUserOverlay"><div id="utUserCard"><h3>UniTrack 사용자 등록</h3><p>이 기기에서 작업할 이름을 선택하세요.</p><div id="utUserList"><div style="padding:10px;color:#777">사용자 목록 불러오는 중…</div></div><div id="utUserManual"><input id="utUserInput" type="text" placeholder="이름 직접 입력"><button type="button" onclick="saveUtUser(document.getElementById('utUserInput').value)">등록</button></div></div></div><button id="notifyBtn" type="button" onclick="enableNotifications()" title="알림 설정">🔔</button>
 <button id="changeUrl" type="button" onclick="changeConnection()">연결 주소 변경</button>
 <div id="pwaScanner">
   <video id="pwaScanVideo" playsinline autoplay muted></video>
@@ -213,34 +139,15 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 const KEY='unitrack_apps_script_url';
 const DEFAULT_APP_URL='https://script.google.com/macros/s/AKfycby94pRfhnMGDxpsgcbzexB7-HjPHKGAmhZkg7MnQFTot7CGCXUSP-LIi-kRDUSwfOCv/exec';
 function valid(u){return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test((u||'').trim())}
-
-function withDeviceUser(u){
-  try{
-    const n=(localStorage.getItem('unitrack_device_user_v1')||'').trim();
-    if(!n)return u;
-    const x=new URL(u);
-    x.searchParams.set('deviceUser',n);
-    return x.toString();
-  }catch(_){return u}
-}
-
+function withDeviceUser(u){try{const n=(localStorage.getItem('unitrack_device_user_v1')||'').trim();if(!n)return u;const x=new URL(u);x.searchParams.set('deviceUser',n);return x.toString()}catch(_){return u}}
 function openApp(u){
  document.getElementById('setup').style.display='none';
  document.getElementById('changeUrl').style.display='block';
  document.getElementById('notifyBtn').style.display='block';
  setTimeout(placeNotifyButton,0);
- const f=document.getElementById('app');f.style.display='block';f.src=withDeviceUser(u);
+ const f=document.getElementById('app');f.style.display='block';f.src=u;
 }
-function changeConnection(){
- const current=localStorage.getItem(KEY)||DEFAULT_APP_URL;
- const u=prompt('Apps Script 웹앱 /exec 연결주소를 입력하세요.',current);
- if(u===null)return;
- const v=String(u).trim();
- if(!valid(v)){alert('Apps Script 웹앱 /exec 주소를 확인해주세요.');return}
- try{localStorage.setItem(KEY,v)}catch(_){}
- openApp(v);
- postDeviceUser();
-}
+function changeConnection(){const current=localStorage.getItem(KEY)||DEFAULT_APP_URL;const u=prompt('Apps Script 웹앱 /exec 연결주소를 입력하세요.',current);if(u===null)return;const v=String(u).trim();if(!valid(v)){alert('Apps Script 웹앱 /exec 주소를 확인해주세요.');return}try{localStorage.setItem(KEY,v)}catch(_){}openApp(withDeviceUser(v));}
 function saveAndOpen(){
  const u=document.getElementById('url').value.trim();
  if(!valid(u)){alert('Apps Script 웹앱 /exec 주소를 입력해주세요.');return}
@@ -248,11 +155,8 @@ function saveAndOpen(){
 }
 let saved='';
 try{saved=localStorage.getItem(KEY)||''}catch(_){}
-if(!valid(saved)){
- saved=DEFAULT_APP_URL;
- try{localStorage.setItem(KEY,saved)}catch(_){}
-}
-openApp(saved);
+if(!valid(saved)){saved=DEFAULT_APP_URL;try{localStorage.setItem(KEY,saved)}catch(_){}}
+openApp(withDeviceUser(saved));
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
 </script>
 <script>
@@ -480,174 +384,15 @@ window.addEventListener('message',ev=>{
   },true);
 })();
 </script>
-
 <script>
-(function(){
-  const FIXED='https://script.google.com/macros/s/AKfycby94pRfhnMGDxpsgcbzexB7-HjPHKGAmhZkg7MnQFTot7CGCXUSP-LIi-kRDUSwfOCv/exec';
-  function bootUniTrack(){
-    let target=FIXED;
-    try{
-      const x=localStorage.getItem('unitrack_apps_script_url')||'';
-      if(/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test(x.trim())) target=x.trim();
-      else localStorage.setItem('unitrack_apps_script_url',FIXED);
-    }catch(e){}
-    const f=document.getElementById('app') || document.querySelector('iframe');
-    if(!f) return;
-    let bootTarget=target;
-    try{
-      const n=(localStorage.getItem('unitrack_device_user_v1')||'').trim();
-      if(n){const x=new URL(target);x.searchParams.set('deviceUser',n);bootTarget=x.toString();}
-    }catch(_){}
-    if(f.getAttribute('src')!==bootTarget) f.setAttribute('src',bootTarget);
-    f.style.display='block';
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',bootUniTrack,{once:true});
-  } else {
-    bootUniTrack();
-  }
-  window.addEventListener('pageshow',bootUniTrack);
-})();
-</script>
-
-
-<script>
-(function(){
-  const f=document.getElementById('app')||document.querySelector('iframe');
-  if(!f)return;
-  let t=setTimeout(function(){
-    if(!document.getElementById('unitrackLoadNote')){
-      const d=document.createElement('div');
-      d.id='unitrackLoadNote';
-      d.textContent='UniTrack 연결 중…';
-      d.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;font:600 15px sans-serif;color:#666';
-      document.body.appendChild(d);
-    }
-  },1500);
-  f.addEventListener('load',function(){
-    clearTimeout(t);
-    const d=document.getElementById('unitrackLoadNote');
-    if(d)d.remove();
-  });
-})();
-</script>
-
-
-<script>
-/* UniTrack V8 - per-device user registration */
-const UNITRACK_USER_KEY='unitrack_device_user_v1';
-let unitrackUserOptions=[];
-
-function currentDeviceUser(){
-  try{return (localStorage.getItem(UNITRACK_USER_KEY)||'').trim()}catch(_){return ''}
-}
-function postDeviceUser(){
-  const name=currentDeviceUser();
-  const f=document.getElementById('app')||document.querySelector('iframe');
-  if(f&&f.contentWindow){
-    try{f.contentWindow.postMessage({type:'UNITRACK_DEVICE_USER',name:name},'*')}catch(_){}
-  }
-  const b=document.getElementById('userBadge');
-  if(b){b.textContent='';b.title=name?('사용자 : '+name+' (변경)'):'사용자 등록';b.setAttribute('aria-label',b.title);b.style.display='block';placeUserButton();}
-}
-
-function placeUserButton(){
-  const u=document.getElementById('userBadge');
-  const n=document.getElementById('notifyBtn');
-  const c=document.getElementById('changeUrl');
-  if(!u||!n||!c)return;
-  const cr=c.getBoundingClientRect();
-  const w=36,g=7,cy=cr.top+cr.height/2;
-  u.style.width=w+'px';u.style.height=w+'px';
-  u.style.left=Math.max(6,cr.left-g-w)+'px';
-  u.style.top=(cy-w/2)+'px';
-  u.style.right='auto';u.style.bottom='auto';
-  n.style.width=w+'px';n.style.height=w+'px';
-  n.style.left=Math.max(6,cr.left-g-w-g-w)+'px';
-  n.style.top=(cy-w/2)+'px';
-  n.style.right='auto';n.style.bottom='auto';
-}
-window.addEventListener('resize',()=>setTimeout(placeUserButton,50));
-window.addEventListener('orientationchange',()=>setTimeout(placeUserButton,180));
-
-function requestUserOptions(){
-  const f=document.getElementById('app')||document.querySelector('iframe');
-  if(f&&f.contentWindow){
-    try{f.contentWindow.postMessage({type:'UNITRACK_REQUEST_NAME_OPTIONS'},'*')}catch(_){}
-  }
-}
-function renderUserOptions(){
-  const box=document.getElementById('userList'); if(!box)return;
-  if(!unitrackUserOptions.length){
-    box.innerHTML='<div style="padding:12px;color:#777">기존 Name 목록을 불러오지 못했습니다. 아래에서 이름을 직접 입력할 수 있습니다.</div>';
-    return;
-  }
-  box.innerHTML=unitrackUserOptions.map(n=>'<button type="button" data-user-name></button>').join('');
-  [...box.querySelectorAll('[data-user-name]')].forEach((b,i)=>{
-    b.textContent=unitrackUserOptions[i];
-    b.onclick=()=>saveDeviceUser(unitrackUserOptions[i]);
-  });
-}
-function openUserRegistration(force){
-  const o=document.getElementById('userOverlay'); if(!o)return;
-  o.classList.add('show');
-  requestUserOptions();
-  if(force) setTimeout(requestUserOptions,500);
-}
-function saveDeviceUser(name){
-  name=String(name||'').trim();
-  if(!name){alert('사용자 이름을 선택하거나 입력해주세요.');return}
-  try{localStorage.setItem(UNITRACK_USER_KEY,name)}catch(_){}
-  document.getElementById('userOverlay').classList.remove('show');
-  postDeviceUser();
-  try{
-    const base=localStorage.getItem('unitrack_apps_script_url')||DEFAULT_APP_URL;
-    openApp(base);
-  }catch(_){}
-}
-window.addEventListener('message',function(ev){
-  const d=ev.data||{};
-  if(d.type==='UNITRACK_APP_READY_FOR_USER'){
-    postDeviceUser();
-    requestUserOptions();
-    if(!currentDeviceUser()) openUserRegistration(false);
-  }
-  if(d.type==='UNITRACK_NAME_OPTIONS'){
-    unitrackUserOptions=[...new Set((d.names||[]).map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
-    renderUserOptions();
-  }
-});
-window.addEventListener('load',function(){
-  setTimeout(function(){
-    postDeviceUser();
-    if(!currentDeviceUser()) openUserRegistration(false);
-    requestUserOptions();
-  },900);
-});
-</script>
-
-
-<script>
-(function(){
-  function alignTopButtons(){
-    try{placeUserButton();}catch(_){}
-    setTimeout(function(){try{placeUserButton();}catch(_){}},60);
-  }
-  window.addEventListener('load',()=>setTimeout(alignTopButtons,500));
-  window.addEventListener('resize',()=>setTimeout(alignTopButtons,80));
-  window.addEventListener('orientationchange',()=>setTimeout(alignTopButtons,250));
-})();
-</script>
-
-
-<script>
-(function(){
- function g(){try{placeUserButton();}catch(_){}}
- window.addEventListener('load',()=>setTimeout(g,650));
- window.addEventListener('resize',()=>setTimeout(g,100));
- window.addEventListener('orientationchange',()=>setTimeout(g,250));
- setTimeout(g,1000);
-})();
-</script>
-
-</body></html>
+const UT_USER_KEY='unitrack_device_user_v1';let utNames=[];
+function utUser(){try{return(localStorage.getItem(UT_USER_KEY)||'').trim()}catch(_){return''}}
+function placeUtUser(){const b=document.getElementById('userBtn'),n=document.getElementById('notifyBtn');if(!b||!n)return;const r=n.getBoundingClientRect(),w=36,g=7;b.style.left=(r.right+g)+'px';b.style.top=(r.top+(r.height-w)/2)+'px';b.style.right='auto';b.style.display='block'}
+function sendUtUser(){const f=document.getElementById('app');if(f&&f.contentWindow)try{f.contentWindow.postMessage({type:'UNITRACK_DEVICE_USER',name:utUser()},'*')}catch(_){}}
+function reqUtNames(){const f=document.getElementById('app');if(f&&f.contentWindow)try{f.contentWindow.postMessage({type:'UNITRACK_REQUEST_NAME_OPTIONS'},'*')}catch(_){}}
+function renderUtNames(){const box=document.getElementById('utUserList');if(!box)return;if(!utNames.length){box.innerHTML='<div style="padding:10px;color:#777">목록이 없으면 아래에 이름을 직접 입력하세요.</div>';return}box.innerHTML='';utNames.forEach(n=>{const b=document.createElement('button');b.type='button';b.textContent=n;b.onclick=()=>saveUtUser(n);box.appendChild(b)})}
+function openUtUser(){document.getElementById('utUserOverlay').classList.add('show');reqUtNames()}
+function saveUtUser(n){n=String(n||'').trim();if(!n){alert('이름을 입력해주세요.');return}try{localStorage.setItem(UT_USER_KEY,n)}catch(_){}document.getElementById('utUserOverlay').classList.remove('show');sendUtUser();const base=localStorage.getItem(KEY)||DEFAULT_APP_URL;openApp(withDeviceUser(base))}
+window.addEventListener('message',ev=>{const d=ev.data||{};if(d.type==='UNITRACK_APP_READY_FOR_USER'){sendUtUser();reqUtNames();if(!utUser())openUtUser()}if(d.type==='UNITRACK_NAME_OPTIONS'){utNames=[...new Set((d.names||[]).map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));renderUtNames()}});
+window.addEventListener('load',()=>setTimeout(()=>{placeUtUser();sendUtUser();if(!utUser())openUtUser()},700));window.addEventListener('resize',()=>setTimeout(placeUtUser,80));window.addEventListener('orientationchange',()=>setTimeout(placeUtUser,220));
+</script></body></html>

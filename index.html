@@ -538,15 +538,15 @@ function postDeviceUser(){
 function placeUserButton(){
   const u=document.getElementById('userBadge');
   const n=document.getElementById('notifyBtn');
-  const c=document.getElementById('changeUrl');
-  if(!u)return;
-  const anchor=(n&&n.offsetParent!==null)?n:c;
-  if(!anchor)return;
-  const r=anchor.getBoundingClientRect();
-  const w=36;
-  u.style.left=Math.max(6,r.left-w-7)+'px';
-  u.style.top=(r.top+(r.height-w)/2)+'px';
+  if(!u||!n)return;
+  const r=n.getBoundingClientRect();
+  const w=36, gap=8;
+  u.style.width=w+'px';
+  u.style.height=w+'px';
+  u.style.left=Math.max(4,r.left-w-gap)+'px';
+  u.style.top=Math.max(4,r.top+(r.height-w)/2)+'px';
   u.style.right='auto';
+  u.style.bottom='auto';
 }
 window.addEventListener('resize',()=>setTimeout(placeUserButton,50));
 window.addEventListener('orientationchange',()=>setTimeout(placeUserButton,180));
@@ -601,6 +601,19 @@ window.addEventListener('load',function(){
     requestUserOptions();
   },900);
 });
+</script>
+
+
+<script>
+(function(){
+  function alignTopButtons(){
+    try{if(typeof placeNotifyButton==='function')placeNotifyButton();}catch(_){}
+    setTimeout(function(){try{placeUserButton();}catch(_){}},30);
+  }
+  window.addEventListener('load',()=>setTimeout(alignTopButtons,500));
+  window.addEventListener('resize',()=>setTimeout(alignTopButtons,80));
+  window.addEventListener('orientationchange',()=>setTimeout(alignTopButtons,250));
+})();
 </script>
 
 </body></html>

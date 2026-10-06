@@ -97,6 +97,25 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   align-self:center!important;
 }
 
+
+/* V8.5 header compact alignment */
+#notifyBtn,#userBadge{
+  width:36px!important;height:36px!important;min-width:36px!important;
+  padding:0!important;margin:0!important;border-radius:18px!important;
+  box-sizing:border-box!important;
+}
+#notifyBtn{font-size:19px!important;line-height:34px!important}
+#userBadge::before{font-size:18px!important;line-height:34px!important}
+#changeUrl{
+  height:36px!important;min-height:36px!important;
+  padding:0 12px!important;
+  font-size:11px!important;line-height:34px!important;
+  white-space:nowrap!important;
+}
+/* PWA chrome only; never scale iframe/app typography */
+body{font-size:16px}
+#app{font-size:initial!important}
+
 </style>
 
 <style>
@@ -538,15 +557,18 @@ function postDeviceUser(){
 function placeUserButton(){
   const u=document.getElementById('userBadge');
   const n=document.getElementById('notifyBtn');
+  const c=document.getElementById('changeUrl');
   if(!u||!n)return;
-  const r=n.getBoundingClientRect();
-  const w=36, gap=8;
-  u.style.width=w+'px';
-  u.style.height=w+'px';
-  u.style.left=Math.max(4,r.left-w-gap)+'px';
-  u.style.top=Math.max(4,r.top+(r.height-w)/2)+'px';
-  u.style.right='auto';
-  u.style.bottom='auto';
+  const nr=n.getBoundingClientRect();
+  const w=36,gap=7;
+  u.style.left=(nr.right+gap)+'px';
+  u.style.top=(nr.top+(nr.height-w)/2)+'px';
+  u.style.right='auto';u.style.bottom='auto';
+  if(c){
+    c.style.left=(nr.right+gap+w+gap)+'px';
+    c.style.right='auto';
+    c.style.top=(nr.top+(nr.height-36)/2)+'px';
+  }
 }
 window.addEventListener('resize',()=>setTimeout(placeUserButton,50));
 window.addEventListener('orientationchange',()=>setTimeout(placeUserButton,180));
@@ -613,6 +635,28 @@ window.addEventListener('load',function(){
   window.addEventListener('load',()=>setTimeout(alignTopButtons,500));
   window.addEventListener('resize',()=>setTimeout(alignTopButtons,80));
   window.addEventListener('orientationchange',()=>setTimeout(alignTopButtons,250));
+})();
+</script>
+
+
+<script>
+(function(){
+ function placeHeaderGroup(){
+   const n=document.getElementById('notifyBtn'),u=document.getElementById('userBadge'),c=document.getElementById('changeUrl');
+   if(!n||!u||!c)return;
+   const top=Math.max(6,c.getBoundingClientRect().top||8);
+   const cw=Math.max(112,c.offsetWidth||112), w=36,g=7, right=112;
+   c.style.right=right+'px';c.style.left='auto';c.style.top=top+'px';
+   const cr=c.getBoundingClientRect();
+   u.style.left=Math.max(6,cr.left-g-w)+'px';u.style.right='auto';u.style.top=(cr.top+(cr.height-w)/2)+'px';
+   const ur=u.getBoundingClientRect();
+   n.style.left=Math.max(6,ur.left-g-w)+'px';n.style.right='auto';n.style.top=(ur.top+(ur.height-w)/2)+'px';
+ }
+ window.placeHeaderGroup=placeHeaderGroup;
+ window.addEventListener('load',()=>setTimeout(placeHeaderGroup,700));
+ window.addEventListener('resize',()=>setTimeout(placeHeaderGroup,100));
+ window.addEventListener('orientationchange',()=>setTimeout(placeHeaderGroup,250));
+ setTimeout(placeHeaderGroup,1000);
 })();
 </script>
 

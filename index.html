@@ -97,25 +97,6 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
   align-self:center!important;
 }
 
-
-/* V8.5 header compact alignment */
-#notifyBtn,#userBadge{
-  width:36px!important;height:36px!important;min-width:36px!important;
-  padding:0!important;margin:0!important;border-radius:18px!important;
-  box-sizing:border-box!important;
-}
-#notifyBtn{font-size:19px!important;line-height:34px!important}
-#userBadge::before{font-size:18px!important;line-height:34px!important}
-#changeUrl{
-  height:36px!important;min-height:36px!important;
-  padding:0 12px!important;
-  font-size:11px!important;line-height:34px!important;
-  white-space:nowrap!important;
-}
-/* PWA chrome only; never scale iframe/app typography */
-body{font-size:16px}
-#app{font-size:initial!important}
-
 </style>
 
 <style>
@@ -232,12 +213,23 @@ body{font-size:16px}
 const KEY='unitrack_apps_script_url';
 const DEFAULT_APP_URL='https://script.google.com/macros/s/AKfycby94pRfhnMGDxpsgcbzexB7-HjPHKGAmhZkg7MnQFTot7CGCXUSP-LIi-kRDUSwfOCv/exec';
 function valid(u){return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test((u||'').trim())}
+
+function withDeviceUser(u){
+  try{
+    const n=(localStorage.getItem('unitrack_device_user_v1')||'').trim();
+    if(!n)return u;
+    const x=new URL(u);
+    x.searchParams.set('deviceUser',n);
+    return x.toString();
+  }catch(_){return u}
+}
+
 function openApp(u){
  document.getElementById('setup').style.display='none';
  document.getElementById('changeUrl').style.display='block';
  document.getElementById('notifyBtn').style.display='block';
  setTimeout(placeNotifyButton,0);
- const f=document.getElementById('app');f.style.display='block';f.src=u;
+ const f=document.getElementById('app');f.style.display='block';f.src=withDeviceUser(u);
 }
 function changeConnection(){
  const current=localStorage.getItem(KEY)||DEFAULT_APP_URL;
@@ -501,7 +493,12 @@ window.addEventListener('message',ev=>{
     }catch(e){}
     const f=document.getElementById('app') || document.querySelector('iframe');
     if(!f) return;
-    if(f.getAttribute('src')!==target) f.setAttribute('src',target);
+    let bootTarget=target;
+    try{
+      const n=(localStorage.getItem('unitrack_device_user_v1')||'').trim();
+      if(n){const x=new URL(target);x.searchParams.set('deviceUser',n);bootTarget=x.toString();}
+    }catch(_){}
+    if(f.getAttribute('src')!==bootTarget) f.setAttribute('src',bootTarget);
     f.style.display='block';
   }
   if(document.readyState==='loading'){
@@ -558,17 +555,17 @@ function placeUserButton(){
   const u=document.getElementById('userBadge');
   const n=document.getElementById('notifyBtn');
   const c=document.getElementById('changeUrl');
-  if(!u||!n)return;
-  const nr=n.getBoundingClientRect();
-  const w=36,gap=7;
-  u.style.left=(nr.right+gap)+'px';
-  u.style.top=(nr.top+(nr.height-w)/2)+'px';
+  if(!u||!n||!c)return;
+  const cr=c.getBoundingClientRect();
+  const w=36,g=7,cy=cr.top+cr.height/2;
+  u.style.width=w+'px';u.style.height=w+'px';
+  u.style.left=Math.max(6,cr.left-g-w)+'px';
+  u.style.top=(cy-w/2)+'px';
   u.style.right='auto';u.style.bottom='auto';
-  if(c){
-    c.style.left=(nr.right+gap+w+gap)+'px';
-    c.style.right='auto';
-    c.style.top=(nr.top+(nr.height-36)/2)+'px';
-  }
+  n.style.width=w+'px';n.style.height=w+'px';
+  n.style.left=Math.max(6,cr.left-g-w-g-w)+'px';
+  n.style.top=(cy-w/2)+'px';
+  n.style.right='auto';n.style.bottom='auto';
 }
 window.addEventListener('resize',()=>setTimeout(placeUserButton,50));
 window.addEventListener('orientationchange',()=>setTimeout(placeUserButton,180));
@@ -603,6 +600,10 @@ function saveDeviceUser(name){
   try{localStorage.setItem(UNITRACK_USER_KEY,name)}catch(_){}
   document.getElementById('userOverlay').classList.remove('show');
   postDeviceUser();
+  try{
+    const base=localStorage.getItem('unitrack_apps_script_url')||DEFAULT_APP_URL;
+    openApp(base);
+  }catch(_){}
 }
 window.addEventListener('message',function(ev){
   const d=ev.data||{};
@@ -629,8 +630,8 @@ window.addEventListener('load',function(){
 <script>
 (function(){
   function alignTopButtons(){
-    try{if(typeof placeNotifyButton==='function')placeNotifyButton();}catch(_){}
-    setTimeout(function(){try{placeUserButton();}catch(_){}},30);
+    try{placeUserButton();}catch(_){}
+    setTimeout(function(){try{placeUserButton();}catch(_){}},60);
   }
   window.addEventListener('load',()=>setTimeout(alignTopButtons,500));
   window.addEventListener('resize',()=>setTimeout(alignTopButtons,80));
@@ -641,22 +642,11 @@ window.addEventListener('load',function(){
 
 <script>
 (function(){
- function placeHeaderGroup(){
-   const n=document.getElementById('notifyBtn'),u=document.getElementById('userBadge'),c=document.getElementById('changeUrl');
-   if(!n||!u||!c)return;
-   const top=Math.max(6,c.getBoundingClientRect().top||8);
-   const cw=Math.max(112,c.offsetWidth||112), w=36,g=7, right=112;
-   c.style.right=right+'px';c.style.left='auto';c.style.top=top+'px';
-   const cr=c.getBoundingClientRect();
-   u.style.left=Math.max(6,cr.left-g-w)+'px';u.style.right='auto';u.style.top=(cr.top+(cr.height-w)/2)+'px';
-   const ur=u.getBoundingClientRect();
-   n.style.left=Math.max(6,ur.left-g-w)+'px';n.style.right='auto';n.style.top=(ur.top+(ur.height-w)/2)+'px';
- }
- window.placeHeaderGroup=placeHeaderGroup;
- window.addEventListener('load',()=>setTimeout(placeHeaderGroup,700));
- window.addEventListener('resize',()=>setTimeout(placeHeaderGroup,100));
- window.addEventListener('orientationchange',()=>setTimeout(placeHeaderGroup,250));
- setTimeout(placeHeaderGroup,1000);
+ function g(){try{placeUserButton();}catch(_){}}
+ window.addEventListener('load',()=>setTimeout(g,650));
+ window.addEventListener('resize',()=>setTimeout(g,100));
+ window.addEventListener('orientationchange',()=>setTimeout(g,250));
+ setTimeout(g,1000);
 })();
 </script>
 

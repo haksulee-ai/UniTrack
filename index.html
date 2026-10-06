@@ -199,7 +199,7 @@ function utInitControls(){
  };
  document.getElementById('utUserInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('utUserSave').click();}});
  document.getElementById('utConnectBtn').onclick=()=>document.getElementById('changeUrl')?.click();
- document.getElementById('utHomeBtn').onclick=()=>{
+ const utGoMainPage=()=>{
    const f=document.getElementById('app');
    const send=()=>{try{
      f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');
@@ -207,6 +207,8 @@ function utInitControls(){
    }catch(_){}};
    send(); setTimeout(send,80); setTimeout(send,220);
  };
+ document.getElementById('utHomeBtn').onclick=utGoMainPage;
+ document.getElementById('utHomeBtn').addEventListener('pointerup',e=>{e.preventDefault();utGoMainPage();});
  bb.onclick=async()=>{
    if(!('Notification' in window)){alert('이 기기는 웹 알림을 지원하지 않습니다.');return}
    let r=Notification.permission;

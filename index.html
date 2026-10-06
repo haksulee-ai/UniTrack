@@ -145,9 +145,11 @@ function openApp(u){
  document.getElementById('changeUrl').style.display='block';
  document.getElementById('notifyBtn').style.display='block';
  setTimeout(placeNotifyButton,0);
- const f=document.getElementById('app');f.style.display='block';f.src=u;
+ const f=document.getElementById('app');
+ f.style.display='block';
+ f.src=withDeviceUser(u);
 }
-function changeConnection(){const current=localStorage.getItem(KEY)||DEFAULT_APP_URL;const u=prompt('Apps Script 웹앱 /exec 연결주소를 입력하세요.',current);if(u===null)return;const v=String(u).trim();if(!valid(v)){alert('Apps Script 웹앱 /exec 주소를 확인해주세요.');return}try{localStorage.setItem(KEY,v)}catch(_){}openApp(withDeviceUser(v));}
+function changeConnection(){const current=localStorage.getItem(KEY)||DEFAULT_APP_URL;const u=prompt('Apps Script 웹앱 /exec 연결주소를 입력하세요.',current);if(u===null)return;const v=String(u).trim();if(!valid(v)){alert('Apps Script 웹앱 /exec 주소를 확인해주세요.');return}try{localStorage.setItem(KEY,v)}catch(_){}openApp(v);}
 function saveAndOpen(){
  const u=document.getElementById('url').value.trim();
  if(!valid(u)){alert('Apps Script 웹앱 /exec 주소를 입력해주세요.');return}
@@ -156,7 +158,7 @@ function saveAndOpen(){
 let saved='';
 try{saved=localStorage.getItem(KEY)||''}catch(_){}
 if(!valid(saved)){saved=DEFAULT_APP_URL;try{localStorage.setItem(KEY,saved)}catch(_){}}
-openApp(withDeviceUser(saved));
+openApp(saved);
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
 </script>
 <script>
@@ -392,7 +394,7 @@ function sendUtUser(){const f=document.getElementById('app');if(f&&f.contentWind
 function reqUtNames(){const f=document.getElementById('app');if(f&&f.contentWindow)try{f.contentWindow.postMessage({type:'UNITRACK_REQUEST_NAME_OPTIONS'},'*')}catch(_){}}
 function renderUtNames(){const box=document.getElementById('utUserList');if(!box)return;if(!utNames.length){box.innerHTML='<div style="padding:10px;color:#777">목록이 없으면 아래에 이름을 직접 입력하세요.</div>';return}box.innerHTML='';utNames.forEach(n=>{const b=document.createElement('button');b.type='button';b.textContent=n;b.onclick=()=>saveUtUser(n);box.appendChild(b)})}
 function openUtUser(){document.getElementById('utUserOverlay').classList.add('show');reqUtNames()}
-function saveUtUser(n){n=String(n||'').trim();if(!n){alert('이름을 입력해주세요.');return}try{localStorage.setItem(UT_USER_KEY,n)}catch(_){}document.getElementById('utUserOverlay').classList.remove('show');sendUtUser();const base=localStorage.getItem(KEY)||DEFAULT_APP_URL;openApp(withDeviceUser(base))}
+function saveUtUser(n){n=String(n||'').trim();if(!n){alert('이름을 입력해주세요.');return}try{localStorage.setItem(UT_USER_KEY,n)}catch(_){}document.getElementById('utUserOverlay').classList.remove('show');sendUtUser();const base=localStorage.getItem(KEY)||DEFAULT_APP_URL;openApp(base)}
 window.addEventListener('message',ev=>{const d=ev.data||{};if(d.type==='UNITRACK_APP_READY_FOR_USER'){sendUtUser();reqUtNames();if(!utUser())openUtUser()}if(d.type==='UNITRACK_NAME_OPTIONS'){utNames=[...new Set((d.names||[]).map(x=>String(x).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));renderUtNames()}});
 window.addEventListener('load',()=>setTimeout(()=>{placeUtUser();sendUtUser();if(!utUser())openUtUser()},700));window.addEventListener('resize',()=>setTimeout(placeUtUser,80));window.addEventListener('orientationchange',()=>setTimeout(placeUtUser,220));
 </script></body></html>

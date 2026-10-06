@@ -114,7 +114,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 </style>
 
 <style>
-#utQuickBar{position:fixed;top:12px;right:12px;z-index:10020;display:none;grid-template-columns:repeat(4,42px);gap:7px;align-items:center}
+#utQuickBar{position:fixed;top:10px;right:12px;z-index:10020;display:none;grid-template-columns:repeat(4,42px);gap:7px;align-items:center}
 .utQuickBtn{width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#096ca8;font-size:20px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;padding:0}
 #utUserOverlay{display:none;position:fixed;inset:0;z-index:300000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:18px}
 #utUserOverlay.show{display:flex}
@@ -131,8 +131,12 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 <div id="utQuickBar">
  <button id="utBellBtn" class="utQuickBtn" type="button" title="알림 설정">🔔</button>
  <button id="utUserBtn" class="utQuickBtn" type="button" title="사용자 설정">👤</button>
- <button id="utConnectBtn" class="utQuickBtn" type="button" title="연결 주소 변경">🔗</button>
- <button id="utHomeBtn" class="utQuickBtn" type="button" title="홈">⌂</button>
+ <button id="utConnectBtn" class="utQuickBtn" type="button" title="연결주소 변경" aria-label="연결주소 변경">
+<svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0-1.4l2.8-2.8a4 4 0 1 1 5.7 5.6l-3.2 3.2a4 4 0 0 1-5.7 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.9 0l3.2-3.2a2 2 0 1 0-2.9-2.8L12 13.4a1 1 0 0 1-1.4 0Zm2.8-2.8a1 1 0 0 1 0 1.4l-2.8 2.8a4 4 0 1 1-5.7-5.6L8.1 6a4 4 0 0 1 5.7 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.9 0l-3.2 3.2a2 2 0 1 0 2.9 2.8l2.8-2.8a1 1 0 0 1 1.4 0Z"/></svg>
+</button>
+<button id="utHomeBtn" class="utQuickBtn" type="button" title="메인장">
+<svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="currentColor" d="M12 3.2 3 10.4V21h6v-6h6v6h6V10.4L12 3.2zm7 15.8h-2v-6H7v6H5v-7.6l7-5.6 7 5.6V19z"/></svg>
+</button>
 </div>
 <div id="utUserOverlay">
  <div id="utUserBox">
@@ -380,7 +384,8 @@ window.addEventListener('message',ev=>{
 <script>
 window.addEventListener('message',function(e){
  const d=e.data||{};
- if(d.type!=='UNITRACK_MOVEMENT_NOTIFY')return;
+ if(d.type!=='UNITRACK_MOVEMENT_NOTIFY' && d.type!=='UNITRACK_MOVEMENT_SAVED')return;
+ if(d.type==='UNITRACK_MOVEMENT_SAVED' && !d.statusChanged)return;
  if(!('Notification'in window)||Notification.permission!=='granted')return;
  const title='UniTrack 유동기록';
  const body=[

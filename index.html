@@ -114,28 +114,30 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 </style>
 
 <style>
-#utUserBtn{position:fixed;top:14px;right:92px;z-index:10020;width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#096ca8;font-size:23px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.18);display:none}
-#utBellBtn{position:fixed;top:14px;right:142px;z-index:10020;width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#096ca8;font-size:21px;box-shadow:0 2px 8px rgba(0,0,0,.18);display:none}
+#utQuickBar{position:fixed;top:12px;right:12px;z-index:10020;display:none;grid-template-columns:repeat(4,42px);gap:7px;align-items:center}
+.utQuickBtn{width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#096ca8;font-size:20px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;padding:0}
 #utUserOverlay{display:none;position:fixed;inset:0;z-index:300000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:18px}
 #utUserOverlay.show{display:flex}
 #utUserBox{width:min(92vw,420px);background:#fff;border-radius:18px;padding:20px;box-sizing:border-box}
 #utUserBox h3{margin:0 0 14px;font-size:20px}
-#utUserRow{display:flex;gap:8px}
-#utUserInput{flex:1;min-width:0;height:44px;border:1px solid #bbb;border-radius:10px;padding:0 12px;font-size:16px}
-#utUserSave{width:76px;height:44px;border:0;border-radius:10px;background:#0875b8;color:#fff;font-weight:800;font-size:16px}
-#utUserCancel{width:100%;margin-top:10px;height:40px;border:0;border-radius:10px;background:#eee;font-weight:700}
+#utUserRow{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:8px;align-items:stretch;width:100%}
+#utUserInput{box-sizing:border-box;width:100%;min-width:0;height:46px;border:1px solid #bbb;border-radius:10px;padding:0 12px;font-size:16px;line-height:46px}
+#utUserSave{box-sizing:border-box;width:82px;height:46px;border:0;border-radius:10px;background:#0875b8;color:#fff;font-weight:800;font-size:16px;margin:0;padding:0}
 </style>
 
 </head>
 <body>
 
-<button id="utBellBtn" type="button" title="알림 설정">🔔</button>
-<button id="utUserBtn" type="button" title="사용자 설정">👤</button>
+<div id="utQuickBar">
+ <button id="utBellBtn" class="utQuickBtn" type="button" title="알림 설정">🔔</button>
+ <button id="utUserBtn" class="utQuickBtn" type="button" title="사용자 설정">👤</button>
+ <button id="utConnectBtn" class="utQuickBtn" type="button" title="연결 주소 변경">🔗</button>
+ <button id="utHomeBtn" class="utQuickBtn" type="button" title="홈">⌂</button>
+</div>
 <div id="utUserOverlay">
  <div id="utUserBox">
   <h3>UniTrack 사용자 지정</h3>
   <div id="utUserRow"><input id="utUserInput" autocomplete="name" placeholder="이름 입력"><button id="utUserSave" type="button">등록</button></div>
-  <button id="utUserCancel" type="button">닫기</button>
  </div>
 </div>
 
@@ -174,18 +176,22 @@ function utSendUser(){
 }
 function utOpenUser(first){
  const o=document.getElementById('utUserOverlay'),i=document.getElementById('utUserInput');
- i.value=utUser();o.classList.add('show');if(first)document.getElementById('utUserCancel').style.display='none';else document.getElementById('utUserCancel').style.display='block';
+ i.value=utUser();o.classList.add('show');
  setTimeout(()=>i.focus(),80);
 }
 function utInitControls(){
  const ub=document.getElementById('utUserBtn'),bb=document.getElementById('utBellBtn'),f=document.getElementById('app');
- ub.style.display='block';bb.style.display='block';
+ document.getElementById('utQuickBar').style.display='grid';
  ub.onclick=()=>utOpenUser(false);
- document.getElementById('utUserCancel').onclick=()=>document.getElementById('utUserOverlay').classList.remove('show');
  document.getElementById('utUserSave').onclick=()=>{
    const n=document.getElementById('utUserInput').value.trim(); if(!n){alert('이름을 입력하세요.');return}
-   localStorage.setItem(UT_USER_KEY,n);document.getElementById('utUserOverlay').classList.remove('show');utSendUser();
+   localStorage.setItem(UT_USER_KEY,n);
+   utSendUser();
+   document.getElementById('utUserOverlay').classList.remove('show');
  };
+ document.getElementById('utUserInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('utUserSave').click();}});
+ document.getElementById('utConnectBtn').onclick=()=>document.getElementById('changeUrl')?.click();
+ document.getElementById('utHomeBtn').onclick=()=>{try{document.getElementById('app').contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*')}catch(_){}};
  bb.onclick=async()=>{
    if(!('Notification'in window)){alert('이 기기는 웹 알림을 지원하지 않습니다.');return}
    const r=await Notification.requestPermission();

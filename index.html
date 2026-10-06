@@ -201,22 +201,27 @@ function utInitControls(){
  document.getElementById('utConnectBtn').onclick=()=>document.getElementById('changeUrl')?.click();
  const utGoMainPage=()=>{
    const f=document.getElementById('app');
-   const base=localStorage.getItem(KEY)||'';
-   if(!f||!base)return;
+   if(!f)return;
    try{
-     const u=new URL(base);
-     const user=utUser();
-     if(user)u.searchParams.set('deviceUser',user);
-     u.searchParams.set('unitrackView','main');
-     // force a real navigation even if the user is already on the same URL
-     u.searchParams.set('_utnav',String(Date.now()));
-     f.src=u.toString();
-   }catch(_){
-     // legacy message fallback
-     try{f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');}catch(__){}
-   }
+     f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');
+     f.contentWindow.postMessage({type:'UNITRACK_NAV_MAIN'},'*');
+   }catch(_){}
+   try{
+     const current=f.getAttribute('src')||f.src;
+     if(current){
+       const u=new URL(current,location.href);
+       u.searchParams.set('unitrackView','main');
+       u.searchParams.set('_utnav',String(Date.now()));
+       f.src=u.toString();
+       return;
+     }
+   }catch(_){}
+   setTimeout(()=>{try{f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');}catch(_){}},100);
  };
  document.getElementById('utHomeBtn').onclick=utGoMainPage;
+ document.getElementById('utHomeBtn').addEventListener('touchend',function(e){
+   e.preventDefault();utGoMainPage();
+ },{passive:false});
  bb.onclick=async()=>{
    if(!('Notification' in window)){alert('이 기기는 웹 알림을 지원하지 않습니다.');return}
    let r=Notification.permission;

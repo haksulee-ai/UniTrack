@@ -201,14 +201,20 @@ function utInitControls(){
  document.getElementById('utConnectBtn').onclick=()=>document.getElementById('changeUrl')?.click();
  const utGoMainPage=()=>{
    const f=document.getElementById('app');
+   if(!f)return;
    const send=()=>{try{
      f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');
      f.contentWindow.postMessage({type:'UNITRACK_NAV_MAIN'},'*');
    }catch(_){}};
    send(); setTimeout(send,80); setTimeout(send,220);
+   // Cross-frame fallback: same Apps Script URL, only hash changes; no reload/camera permission reset.
+   try{
+     const u=new URL(f.src);
+     u.hash='unitrack-main';
+     f.src=u.toString();
+   }catch(_){}
  };
  document.getElementById('utHomeBtn').onclick=utGoMainPage;
- document.getElementById('utHomeBtn').addEventListener('pointerup',e=>{e.preventDefault();utGoMainPage();});
  bb.onclick=async()=>{
    if(!('Notification' in window)){alert('이 기기는 웹 알림을 지원하지 않습니다.');return}
    let r=Notification.permission;

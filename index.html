@@ -444,4 +444,15 @@ window.addEventListener('message',function(e){
  })();
 });
 </script>
+<script>
+/* PORTRAIT_LOCK_V1 */
+(function(){
+  async function lockPortrait(){
+    try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('portrait');}catch(e){}
+  }
+  window.addEventListener('load',lockPortrait);
+  window.addEventListener('pageshow',lockPortrait);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)lockPortrait();});
+})();
+</script>
 </body></html>

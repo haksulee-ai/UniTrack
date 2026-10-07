@@ -193,7 +193,7 @@ function utInitControls(){
  ub.onclick=()=>utOpenUser(false);
  document.getElementById('utUserSave').onclick=()=>{
    const n=document.getElementById('utUserInput').value.trim(); if(!n){alert('이름을 입력하세요.');return}
-   localStorage.setItem(UT_USER_KEY,n);
+   localStorage.setItem(UT_USER_KEY,n); setTimeout(utSendUser,80); setTimeout(utSendUser,260);
    utSendUser();
    document.getElementById('utUserOverlay').classList.remove('show');
  };

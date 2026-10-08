@@ -114,6 +114,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 </style>
 
 <style>
+#utQuickBar:not(.utOnMain) #utBellBtn,#utQuickBar:not(.utOnMain) #utUserBtn,#utQuickBar:not(.utOnMain) #utConnectBtn{display:none!important}
 #utQuickBar{position:fixed;top:3px;right:10px;z-index:10020;display:none;grid-template-columns:repeat(4,42px);gap:7px;align-items:center}
 .utQuickBtn{width:42px;height:42px;border:0;border-radius:50%;background:#fff;color:#096ca8;font-size:20px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;padding:0}
 #utUserOverlay{display:none;position:fixed;inset:0;z-index:300000;background:rgba(0,0,0,.45);align-items:center;justify-content:center;padding:18px}
@@ -190,6 +191,7 @@ function utOpenUser(first){
 function utInitControls(){
  const ub=document.getElementById('utUserBtn'),bb=document.getElementById('utBellBtn'),f=document.getElementById('app');
  document.getElementById('utQuickBar').style.display='grid';
+  document.getElementById('utQuickBar').classList.add('utOnMain');
  ub.onclick=()=>utOpenUser(false);
  document.getElementById('utUserSave').onclick=()=>{
    const n=document.getElementById('utUserInput').value.trim(); if(!n){alert('이름을 입력하세요.');return}
@@ -200,6 +202,7 @@ function utInitControls(){
  document.getElementById('utUserInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('utUserSave').click();}});
  document.getElementById('utConnectBtn').onclick=()=>document.getElementById('changeUrl')?.click();
  const utGoMainPage=()=>{
+    document.getElementById('utQuickBar')?.classList.add('utOnMain');
    const f=document.getElementById('app');
    if(!f)return;
    try{
@@ -242,6 +245,13 @@ function utInitControls(){
  if(f)f.addEventListener('load',()=>setTimeout(utSendUser,250));
  if(!utUser())setTimeout(()=>utOpenUser(true),350);
 }
+// Main-page state from the embedded Apps Script (V27).
+window.addEventListener('message',function(ev){
+  if(ev.source!==document.getElementById('app')?.contentWindow)return;
+  const d=ev.data||{};
+  if(d.type!=='UNITRACK_PAGE_CHANGE')return;
+  document.getElementById('utQuickBar')?.classList.toggle('utOnMain',d.isMain===true);
+});
 window.addEventListener('DOMContentLoaded',utInitControls);
 
 function openApp(u){

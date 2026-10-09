@@ -270,19 +270,20 @@ function utV49ReturnMain_(){
 }
 window.addEventListener('message',function(ev){
  const d=ev.data||{};
- if(d.type!=='UNITRACK_PAGE_CHANGE')return;
+ if(d.type!=='UNITRACK_PAGE_CHANGE' && d.type!=='UNITRACK_FILTER_OPEN')return;
  const fr=document.getElementById('app');
  if(!fr||!fr.contentWindow)return;
  if(ev.source!==fr.contentWindow){
    try{if(ev.origin!=='https://script.google.com'&&!ev.origin.endsWith('.googleusercontent.com'))return}catch(_){return}
  }
+ if(d.type==='UNITRACK_FILTER_OPEN'){utV49CurrentPage_='filterOverlay';utV49ArmOuterBack_();return;}
  utV49CurrentPage_=String(d.page||'');
  if(utV49CurrentPage_==='detailPage')utV49ArmOuterBack_();
 });
 window.addEventListener('popstate',function(){
  if(!utV49BackGuardArmed_)return;
  utV49BackGuardArmed_=false;
- if(utV49CurrentPage_==='detailPage')utV49ReturnMain_();
+ if(utV49CurrentPage_==='detailPage'||utV49CurrentPage_==='filterOverlay')utV49ReturnMain_();
  // Keep the PWA's next Back from navigating to an empty outer browser page.
  utV49ArmOuterBack_();
 });

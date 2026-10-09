@@ -131,7 +131,7 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 #changeUrl{display:none!important}
 </style>
 <style id="ut-v37-bell-style">
-#utBellBtn{position:relative}
+#utBellBtn{position:relative;grid-column:2}
 #utBellBtn.utBellUnread::after{content:'';position:absolute;right:2px;top:1px;width:11px;height:11px;background:#e22530;border:2px solid white;border-radius:50%}
 #utBellPanel{position:fixed;top:55px;right:10px;z-index:10025;width:min(390px,calc(100vw - 20px));max-height:min(65vh,600px);background:#fff;color:#172334;border:1px solid #d6dfe8;border-radius:14px;box-shadow:0 10px 32px #0004;overflow:hidden}
 #utBellPanel[hidden]{display:none!important}
@@ -147,7 +147,6 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 
 <div id="utQuickBar">
  <button id="utBellBtn" class="utQuickBtn" type="button" title="유동이력 알림 목록">🔔</button>
- <button id="utUserBtn" class="utQuickBtn" type="button" title="사용자 설정">👤</button>
  <button id="utConnectBtn" class="utQuickBtn" type="button" title="연결주소 변경" aria-label="연결주소 변경">
 <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0-1.4l2.8-2.8a4 4 0 1 1 5.7 5.6l-3.2 3.2a4 4 0 0 1-5.7 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.9 0l3.2-3.2a2 2 0 1 0-2.9-2.8L12 13.4a1 1 0 0 1-1.4 0Zm2.8-2.8a1 1 0 0 1 0 1.4l-2.8 2.8a4 4 0 1 1-5.7-5.6L8.1 6a4 4 0 0 1 5.7 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.9 0l-3.2 3.2a2 2 0 1 0 2.9 2.8l2.8-2.8a1 1 0 0 1 1.4 0Z"/></svg>
 </button>
@@ -208,7 +207,7 @@ function utInitControls(){
  const ub=document.getElementById('utUserBtn'),bb=document.getElementById('utBellBtn'),f=document.getElementById('app');
  document.getElementById('utQuickBar').style.display='grid';
   document.getElementById('utQuickBar').classList.add('utOnMain');
- ub.onclick=()=>utOpenUser(false);
+ if(ub)ub.onclick=()=>utOpenUser(false);
  document.getElementById('utUserSave').onclick=()=>{
    const n=document.getElementById('utUserInput').value.trim(); if(!n){alert('이름을 입력하세요.');return}
    localStorage.setItem(UT_USER_KEY,n); setTimeout(utSendUser,80); setTimeout(utSendUser,260);

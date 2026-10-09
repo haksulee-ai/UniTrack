@@ -259,6 +259,15 @@ function utV49ArmOuterBack_(){
  if(utV49BackGuardArmed_)return;
  try{history.pushState({utV49BackGuard:true},'',location.href);utV49BackGuardArmed_=true}catch(_){}
 }
+function utV51ReturnFromBack_(){
+ if(utV49CurrentSource_==='일반유니트'){
+   utV49CurrentPage_='listPage';
+   document.getElementById('utQuickBar')?.classList.remove('utOnMain');
+   const fr=document.getElementById('app');
+   try{fr?.contentWindow?.postMessage({type:'UNITRACK_NAV_GENERAL_LIST'},'*')}catch(_){}
+ }else utV49ReturnMain_();
+}
+let utV49CurrentSource_='';
 function utV49ReturnMain_(){
  utV49CurrentPage_='mainPage';
  document.getElementById('utQuickBar')?.classList.add('utOnMain');
@@ -276,14 +285,15 @@ window.addEventListener('message',function(ev){
  if(ev.source!==fr.contentWindow){
    try{if(ev.origin!=='https://script.google.com'&&!ev.origin.endsWith('.googleusercontent.com'))return}catch(_){return}
  }
- if(d.type==='UNITRACK_FILTER_OPEN'){utV49CurrentPage_='filterOverlay';utV49ArmOuterBack_();return;}
+ if(d.type==='UNITRACK_FILTER_OPEN'){utV49CurrentPage_='filterOverlay';utV49CurrentSource_=String(d.source||utV49CurrentSource_);utV49ArmOuterBack_();return;}
  utV49CurrentPage_=String(d.page||'');
+ utV49CurrentSource_=String(d.source||'');
  if(utV49CurrentPage_==='detailPage')utV49ArmOuterBack_();
 });
 window.addEventListener('popstate',function(){
  if(!utV49BackGuardArmed_)return;
  utV49BackGuardArmed_=false;
- if(utV49CurrentPage_==='detailPage'||utV49CurrentPage_==='filterOverlay')utV49ReturnMain_();
+ if(utV49CurrentPage_==='detailPage'||utV49CurrentPage_==='filterOverlay')utV51ReturnFromBack_();
  // Keep the PWA's next Back from navigating to an empty outer browser page.
  utV49ArmOuterBack_();
 });

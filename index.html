@@ -130,11 +130,23 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 /* V5: keep the legacy connection action available but hide its old text button. */
 #changeUrl{display:none!important}
 </style>
+<style id="ut-v37-bell-style">
+#utBellBtn{position:relative}
+#utBellBtn.utBellUnread::after{content:'';position:absolute;right:2px;top:1px;width:11px;height:11px;background:#e22530;border:2px solid white;border-radius:50%}
+#utBellPanel{position:fixed;top:55px;right:10px;z-index:10025;width:min(390px,calc(100vw - 20px));max-height:min(65vh,600px);background:#fff;color:#172334;border:1px solid #d6dfe8;border-radius:14px;box-shadow:0 10px 32px #0004;overflow:hidden}
+#utBellPanel[hidden]{display:none!important}
+.utBellHead{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-bottom:1px solid #e1e5e9;font-size:17px}
+#utBellClose{font-size:28px;line-height:1;border:0;background:transparent;padding:0 7px;color:#263445}
+.utBellItems{overflow:auto;max-height:calc(65vh - 55px)}
+.utBellEntry{padding:12px 15px;border-bottom:1px solid #e9edf2;font-size:14px;line-height:1.6;white-space:pre-line;overflow-wrap:anywhere}
+.utBellEntry strong{display:block;font-size:15px;margin-bottom:5px}
+.utBellEmpty{padding:22px;text-align:center;color:#667}
+</style>
 </head>
 <body>
 
 <div id="utQuickBar">
- <button id="utBellBtn" class="utQuickBtn" type="button" title="알림 설정">🔔</button>
+ <button id="utBellBtn" class="utQuickBtn" type="button" title="유동이력 알림 목록">🔔</button>
  <button id="utUserBtn" class="utQuickBtn" type="button" title="사용자 설정">👤</button>
  <button id="utConnectBtn" class="utQuickBtn" type="button" title="연결주소 변경" aria-label="연결주소 변경">
 <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="currentColor" d="M10.6 13.4a1 1 0 0 1 0-1.4l2.8-2.8a4 4 0 1 1 5.7 5.6l-3.2 3.2a4 4 0 0 1-5.7 0 1 1 0 1 1 1.4-1.4 2 2 0 0 0 2.9 0l3.2-3.2a2 2 0 1 0-2.9-2.8L12 13.4a1 1 0 0 1-1.4 0Zm2.8-2.8a1 1 0 0 1 0 1.4l-2.8 2.8a4 4 0 1 1-5.7-5.6L8.1 6a4 4 0 0 1 5.7 0 1 1 0 1 1-1.4 1.4 2 2 0 0 0-2.9 0l-3.2 3.2a2 2 0 1 0 2.9 2.8l2.8-2.8a1 1 0 0 1 1.4 0Z"/></svg>
@@ -142,6 +154,10 @@ button{width:100%;height:60px;margin-top:12px;border:0;border-radius:12px;backgr
 <button id="utHomeBtn" class="utQuickBtn" type="button" title="메인장">
 <svg viewBox="0 0 24 24" width="23" height="23" aria-hidden="true"><path fill="currentColor" d="M12 3.2 3 10.4V21h6v-6h6v6h6V10.4L12 3.2zm7 15.8h-2v-6H7v6H5v-7.6l7-5.6 7 5.6V19z"/></svg>
 </button>
+</div>
+<div id="utBellPanel" role="dialog" aria-label="유동이력 알림 목록" aria-modal="false" hidden>
+ <div class="utBellHead"><strong>🔔 유동이력 알림</strong><button id="utBellClose" type="button" aria-label="닫기">×</button></div>
+ <div id="utBellItems" class="utBellItems"><div class="utBellEmpty">새 알림이 없습니다.</div></div>
 </div>
 <div id="utUserOverlay">
  <div id="utUserBox">
@@ -225,23 +241,7 @@ function utInitControls(){
  document.getElementById('utHomeBtn').addEventListener('touchend',function(e){
    e.preventDefault();utGoMainPage();
  },{passive:false});
- bb.onclick=async()=>{
-   if(!('Notification' in window)){alert('이 기기는 웹 알림을 지원하지 않습니다.');return}
-   let r=Notification.permission;
-   if(r!=='granted') r=await Notification.requestPermission();
-   if(r!=='granted'){alert('알림 권한이 허용되지 않았습니다.');return}
-   try{
-     const reg=await navigator.serviceWorker.ready;
-     await reg.showNotification('UniTrack 알림 테스트',{
-       body:'알림 설정이 정상입니다.',
-       tag:'unitrack-test',
-       renotify:true
-     });
-   }catch(e){
-     try{new Notification('UniTrack 알림 테스트',{body:'알림 설정이 정상입니다.',tag:'unitrack-test'});}
-     catch(_){alert('알림 권한은 허용되어 있지만 알림 표시를 실행하지 못했습니다.');}
-   }
- };
+ bb.onclick=()=>utBellOpen();
  if(f)f.addEventListener('load',()=>setTimeout(utSendUser,250));
  if(!utUser())setTimeout(()=>utOpenUser(true),350);
 }
@@ -251,6 +251,40 @@ window.addEventListener('message',function(ev){
   const d=ev.data||{};
   if(d.type!=='UNITRACK_PAGE_CHANGE')return;
   document.getElementById('utQuickBar')?.classList.toggle('utOnMain',d.isMain===true);
+});
+/* V49: Android system Back from detail -> main immediately (no iframe reload). */
+let utV49CurrentPage_='mainPage';
+let utV49BackGuardArmed_=false;
+function utV49ArmOuterBack_(){
+ if(utV49BackGuardArmed_)return;
+ try{history.pushState({utV49BackGuard:true},'',location.href);utV49BackGuardArmed_=true}catch(_){}
+}
+function utV49ReturnMain_(){
+ utV49CurrentPage_='mainPage';
+ document.getElementById('utQuickBar')?.classList.add('utOnMain');
+ const fr=document.getElementById('app');
+ if(fr&&fr.contentWindow){
+   try{fr.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*')}catch(_){}
+   try{fr.contentWindow.postMessage({type:'UNITRACK_NAV_MAIN'},'*')}catch(_){}
+ }
+}
+window.addEventListener('message',function(ev){
+ const d=ev.data||{};
+ if(d.type!=='UNITRACK_PAGE_CHANGE')return;
+ const fr=document.getElementById('app');
+ if(!fr||!fr.contentWindow)return;
+ if(ev.source!==fr.contentWindow){
+   try{if(ev.origin!=='https://script.google.com'&&!ev.origin.endsWith('.googleusercontent.com'))return}catch(_){return}
+ }
+ utV49CurrentPage_=String(d.page||'');
+ if(utV49CurrentPage_==='detailPage')utV49ArmOuterBack_();
+});
+window.addEventListener('popstate',function(){
+ if(!utV49BackGuardArmed_)return;
+ utV49BackGuardArmed_=false;
+ if(utV49CurrentPage_==='detailPage')utV49ReturnMain_();
+ // Keep the PWA's next Back from navigating to an empty outer browser page.
+ utV49ArmOuterBack_();
 });
 window.addEventListener('DOMContentLoaded',utInitControls);
 
@@ -463,6 +497,49 @@ window.addEventListener('message',function(e){
   window.addEventListener('load',lockPortrait);
   window.addEventListener('pageshow',lockPortrait);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)lockPortrait();});
+})();
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js"></script>
+<script src="./push-config.js"></script>
+<script src="./push-client.js"></script>
+<script id="ut-v37-bell-script">
+(function(){
+ const items=[];const seen=new Set();let unread=0;
+ function render(){
+   const box=document.getElementById('utBellItems');if(!box)return;
+   box.replaceChildren();
+   if(!items.length){const p=document.createElement('div');p.className='utBellEmpty';p.textContent='새 알림이 없습니다.';box.appendChild(p);return}
+   items.forEach(e=>{
+     const div=document.createElement('div');div.className='utBellEntry';
+     const h=document.createElement('strong');h.textContent='🔔 UniTrack 유동이력 발생';div.appendChild(h);
+     const detail=document.createElement('div');detail.textContent='Unit: '+(e.unit||'-')+'\n변경상태: '+(e.fromStatus||'-')+' → '+(e.toStatus||'-')+'\n처리자: '+(e.user||'-')+'\n변경시간: '+(e.date||'-');div.appendChild(detail);box.appendChild(div);
+   });
+ }
+ window.utBellOpen=function(){
+   const p=document.getElementById('utBellPanel');if(!p)return;
+   p.hidden=!p.hidden;
+   if(!p.hidden){unread=0;document.getElementById('utBellBtn')?.classList.remove('utBellUnread');render()}
+ };
+ window.addEventListener('message',ev=>{
+   const d=ev.data||{};
+   if(d.type!=='UNITRACK_LIVE_NOTIFICATION'||!d.event||!d.event.id)return;
+   // Accept messages only from the embedded app frame or its Google-hosted nested frame.
+   const app=document.getElementById('app');
+   if(!app||!app.contentWindow)return;
+   if(ev.source!==app.contentWindow){
+     try{if(ev.origin!=='https://script.google.com'&&!ev.origin.endsWith('.googleusercontent.com'))return}catch(_){return}
+   }
+   const e=d.event;if(seen.has(e.id))return;
+   seen.add(e.id);if(seen.size>500)seen.clear();
+   items.unshift(e);if(items.length>100)items.length=100;
+   const p=document.getElementById('utBellPanel');
+   if(p&&p.hidden){unread++;document.getElementById('utBellBtn')?.classList.add('utBellUnread')}
+   else render();
+ });
+ window.addEventListener('DOMContentLoaded',()=>{
+   document.getElementById('utBellClose')?.addEventListener('click',()=>{document.getElementById('utBellPanel').hidden=true});
+ });
 })();
 </script>
 </body></html>

@@ -241,7 +241,7 @@ function utInitControls(){
    e.preventDefault();utGoMainPage();
  },{passive:false});
  bb.onclick=()=>utBellOpen();
- if(f)f.addEventListener('load',()=>setTimeout(utSendUser,250));
+ if(f)f.addEventListener('load',()=>{setTimeout(utSendUser,250);utV49ArmOuterBack_();});
  if(!utUser())setTimeout(()=>utOpenUser(true),350);
 }
 // Main-page state from the embedded Apps Script (V27).
@@ -287,12 +287,14 @@ window.addEventListener('message',function(ev){
  if(d.type==='UNITRACK_FILTER_OPEN'){utV49CurrentPage_='filterOverlay';utV49CurrentSource_=String(d.source||utV49CurrentSource_);utV49ArmOuterBack_();return;}
  utV49CurrentPage_=String(d.page||'');
  utV49CurrentSource_=String(d.source||'');
- if(utV49CurrentPage_==='detailPage')utV49ArmOuterBack_();
+ // Every screen opened from the main page needs an Android Back history entry.
+ if(utV49CurrentPage_!=='mainPage')utV49ArmOuterBack_();
 });
 window.addEventListener('popstate',function(){
  if(!utV49BackGuardArmed_)return;
  utV49BackGuardArmed_=false;
  if(utV49CurrentPage_==='detailPage'||utV49CurrentPage_==='filterOverlay')utV51ReturnFromBack_();
+ else if(utV49CurrentPage_!=='mainPage')utV49ReturnMain_();
  // Keep the PWA's next Back from navigating to an empty outer browser page.
  utV49ArmOuterBack_();
 });

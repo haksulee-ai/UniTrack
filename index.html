@@ -297,7 +297,13 @@ window.addEventListener('message',function(ev){
 window.addEventListener('popstate',function(){
  if(!utV49BackGuardArmed_)return;
  utV49BackGuardArmed_=false;
- if(utV49CurrentPage_==='detailPage'){
+ if(utV49CurrentPage_==='actaDetail'){
+   // ACTA detail -> ACTA list; keep a guard for the subsequent Back.
+   utV49CurrentPage_='acta';
+   utV58ActaBackStage_=1;
+   try{document.getElementById('app')?.contentWindow?.postMessage({type:'UNITRACK_NAV_ACTA_LIST'},'*')}catch(_){}
+   utV49ArmOuterBack_();
+ }else if(utV49CurrentPage_==='detailPage'){
    if(['SFP','SKT품목','일반유니트'].includes(utV49CurrentSource_))utV51ReturnFromBack_();
    else{
      utV49CurrentPage_='home';

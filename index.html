@@ -217,6 +217,7 @@ function utInitControls(){
  document.getElementById('utUserInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('utUserSave').click();}});
  document.getElementById('utConnectBtn').onclick=()=>document.getElementById('changeUrl')?.click();
  const utGoMainPage=()=>{
+   utV49CurrentPage_='mainPage';
     document.getElementById('utQuickBar')?.classList.add('utOnMain');
    const f=document.getElementById('app');
    if(!f)return;
@@ -241,7 +242,7 @@ function utInitControls(){
    e.preventDefault();utGoMainPage();
  },{passive:false});
  bb.onclick=()=>utBellOpen();
- if(f)f.addEventListener('load',()=>{setTimeout(utSendUser,250);utV49ArmOuterBack_();});
+ if(f)f.addEventListener('load',()=>{setTimeout(utSendUser,250);});
  if(!utUser())setTimeout(()=>utOpenUser(true),350);
 }
 // Main-page state from the embedded Apps Script (V27).
@@ -295,8 +296,8 @@ window.addEventListener('popstate',function(){
  utV49BackGuardArmed_=false;
  if(utV49CurrentPage_==='detailPage'||utV49CurrentPage_==='filterOverlay')utV51ReturnFromBack_();
  else if(utV49CurrentPage_!=='mainPage')utV49ReturnMain_();
- // Keep the PWA's next Back from navigating to an empty outer browser page.
- utV49ArmOuterBack_();
+ // Do not re-arm at the main page: Back from main is allowed to exit.
+ // A new guard is created only when another subpage is opened.
 });
 window.addEventListener('DOMContentLoaded',utInitControls);
 

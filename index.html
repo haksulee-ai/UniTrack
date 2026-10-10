@@ -268,6 +268,7 @@ function utV51ReturnFromBack_(){
  }else utV49ReturnMain_();
 }
 let utV49CurrentSource_='';
+let utV58ActaBackStage_=0;
 function utV49ReturnMain_(){
  utV49CurrentPage_='mainPage';
  document.getElementById('utQuickBar')?.classList.add('utOnMain');
@@ -286,16 +287,28 @@ window.addEventListener('message',function(ev){
    try{if(ev.origin!=='https://script.google.com'&&!ev.origin.endsWith('.googleusercontent.com'))return}catch(_){return}
  }
  if(d.type==='UNITRACK_FILTER_OPEN'){utV49CurrentPage_='filterOverlay';utV49CurrentSource_=String(d.source||utV49CurrentSource_);utV49ArmOuterBack_();return;}
+ const prevPage=utV49CurrentPage_;
  utV49CurrentPage_=String(d.page||'');
  utV49CurrentSource_=String(d.source||'');
+ if(utV49CurrentPage_==='acta' && prevPage!=='acta' && prevPage!=='actaDetail')utV58ActaBackStage_=0;
  // Every screen opened from the main page needs an Android Back history entry.
  if(utV49CurrentPage_!=='mainPage')utV49ArmOuterBack_();
 });
 window.addEventListener('popstate',function(){
  if(!utV49BackGuardArmed_)return;
  utV49BackGuardArmed_=false;
- if(utV49CurrentPage_==='detailPage'||utV49CurrentPage_==='filterOverlay')utV51ReturnFromBack_();
- else if(utV49CurrentPage_!=='mainPage')utV49ReturnMain_();
+ if(utV49CurrentPage_==='detailPage'){
+   if(['SFP','SKT품목','일반유니트'].includes(utV49CurrentSource_))utV51ReturnFromBack_();
+   else{
+     utV49CurrentPage_='home';
+     try{document.getElementById('app')?.contentWindow?.postMessage({type:'UNITRACK_NAV_BACK_DETAIL'},'*')}catch(_){}
+   }
+ }else if(utV49CurrentPage_==='filterOverlay')utV51ReturnFromBack_();
+ else if(utV49CurrentPage_==='acta' && utV58ActaBackStage_===0){
+   // Requested ACTA behavior: first Back keeps the list; second Back returns to main.
+   utV58ActaBackStage_=1;
+   utV49ArmOuterBack_();
+ }else if(utV49CurrentPage_!=='mainPage')utV49ReturnMain_();
  // Do not re-arm at the main page: Back from main is allowed to exit.
  // A new guard is created only when another subpage is opened.
 });

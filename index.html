@@ -225,16 +225,10 @@ function utInitControls(){
      f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');
      f.contentWindow.postMessage({type:'UNITRACK_NAV_MAIN'},'*');
    }catch(_){}
-   try{
-     const current=f.getAttribute('src')||f.src;
-     if(current){
-       const u=new URL(current,location.href);
-       u.searchParams.set('unitrackView','main');
-       u.searchParams.set('_utnav',String(Date.now()));
-       f.src=u.toString();
-       return;
-     }
-   }catch(_){}
+   // V69: Never reload the Apps Script iframe on Home.
+   // Reloading recreates the login gate and causes repeated login prompts.
+   // The existing Apps Script page handles the navigation message and keeps
+   // its authenticated session; logout/expiry remain server-enforced.
    setTimeout(()=>{try{f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');}catch(_){}},100);
  };
  document.getElementById('utHomeBtn').onclick=utGoMainPage;

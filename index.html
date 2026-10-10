@@ -259,11 +259,11 @@ function utV49ArmOuterBack_(){
  try{history.pushState({utV49BackGuard:true},'',location.href);utV49BackGuardArmed_=true}catch(_){}
 }
 function utV51ReturnFromBack_(){
- if(utV49CurrentSource_==='일반유니트'){
+ if(['SFP','SKT품목','일반유니트'].includes(utV49CurrentSource_)){
    utV49CurrentPage_='listPage';
    document.getElementById('utQuickBar')?.classList.remove('utOnMain');
    const fr=document.getElementById('app');
-   try{fr?.contentWindow?.postMessage({type:'UNITRACK_NAV_GENERAL_LIST'},'*')}catch(_){}
+   try{fr?.contentWindow?.postMessage({type:'UNITRACK_NAV_SOURCE_LIST',source:utV49CurrentSource_},'*')}catch(_){}
  }else utV49ReturnMain_();
 }
 let utV49CurrentSource_='';

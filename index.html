@@ -216,20 +216,25 @@ function utInitControls(){
  };
  document.getElementById('utUserInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('utUserSave').click();}});
  document.getElementById('utConnectBtn').onclick=()=>document.getElementById('changeUrl')?.click();
+ // V70: Google Apps Script may run inside an extra googleusercontent frame.
+ // Keep the real application window supplied by its READY message.
+ let utV70AppWindow=null;
+ window.addEventListener('message',function(ev){
+   if(ev.data && ev.data.type==='UNITRACK_APP_NAV_READY' && ev.source){
+     utV70AppWindow=ev.source;
+   }
+ });
+ const utV70SendHome=()=>{
+   const payload={type:'UNITRACK_GO_HOME'};
+   try{utV70AppWindow&&utV70AppWindow.postMessage(payload,'*')}catch(_){}
+   try{document.getElementById('app')?.contentWindow?.postMessage(payload,'*')}catch(_){}
+ };
  const utGoMainPage=()=>{
    utV49CurrentPage_='mainPage';
-    document.getElementById('utQuickBar')?.classList.add('utOnMain');
-   const f=document.getElementById('app');
-   if(!f)return;
-   try{
-     f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');
-     f.contentWindow.postMessage({type:'UNITRACK_NAV_MAIN'},'*');
-   }catch(_){}
-   // V69: Never reload the Apps Script iframe on Home.
-   // Reloading recreates the login gate and causes repeated login prompts.
-   // The existing Apps Script page handles the navigation message and keeps
-   // its authenticated session; logout/expiry remain server-enforced.
-   setTimeout(()=>{try{f.contentWindow.postMessage({type:'UNITRACK_GO_HOME'},'*');}catch(_){}},100);
+   document.getElementById('utQuickBar')?.classList.add('utOnMain');
+   utV70SendHome();
+   setTimeout(utV70SendHome,150);
+   setTimeout(utV70SendHome,500);
  };
  document.getElementById('utHomeBtn').onclick=utGoMainPage;
  document.getElementById('utHomeBtn').addEventListener('touchend',function(e){

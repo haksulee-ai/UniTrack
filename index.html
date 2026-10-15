@@ -551,4 +551,39 @@ window.addEventListener('message',function(e){
  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(tellUrl,250)});
 })();
 </script>
+<script id="utV102ApplyLatestBridge">
+/* Persistent connection URL is updated in the PWA's own localStorage origin.
+   Admin updates latest-deployment.json when deploying to a new /exec address. */
+(function(){
+ const FALLBACK_EXEC="https://script.google.com/macros/s/AKfycbybhhahIyHhZl91YTg6GeNjqNGEhF8AI-5OrbT4awPw9UCpPdj3pYyYfvK7uiJi5Xn7YQ/exec";
+ const CONF='./latest-deployment.json';
+ const NORMAL=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
+ const GAS=/^https:\/\/script\.google\.com$|^https:\/\/[a-z0-9.-]*googleusercontent\.com$/i;
+ let busy=false;
+ async function latest(){
+   try{const r=await fetch(CONF+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);
+     const j=await r.json();if(NORMAL.test(String(j.execUrl||'')))return String(j.execUrl);
+   }catch(_){/* offline fallback */}
+   return FALLBACK_EXEC;
+ }
+ window.addEventListener('message',async function(e){
+   const d=e.data||{};
+   if(d.type!=='UNITRACK_APPLY_LATEST' || !GAS.test(e.origin) || busy)return;
+   const f=document.getElementById('app');if(!f||f.style.display==='none')return;
+   busy=true;
+   try{
+     const newest=await latest();
+     if(!NORMAL.test(newest))throw Error('올바른 배포 주소가 아닙니다.');
+     localStorage.setItem(KEY,newest);
+     const setupInput=document.getElementById('url');if(setupInput)setupInput.value=newest;
+     try{e.source&&e.source.postMessage({type:'UNITRACK_APPLY_LATEST_RESULT',ok:true,url:newest},e.origin)}catch(_){}
+     // Re-open, including when URL is unchanged, to discard older iframe contents.
+     const target=new URL(utWithUser(newest));target.searchParams.set('utManualUpdate',String(Date.now()));
+     f.src=target.toString();
+   }catch(err){
+     try{e.source&&e.source.postMessage({type:'UNITRACK_APPLY_LATEST_RESULT',ok:false,message:String(err.message||err)},e.origin)}catch(_){}
+   }finally{busy=false}
+ });
+})();
+</script>
 </body></html>

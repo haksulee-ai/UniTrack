@@ -516,4 +516,39 @@ window.addEventListener('message',function(e){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js"></script>
 <script src="./push-config.js"></script>
 <script src="./push-client.js"></script>
+
+<script id="utV101PwaUpdateBridge">
+/* V101: refresh the existing Apps Script iframe after it detects a newer deployment. */
+(function(){
+ let lastReload=0;
+ const GAS=/^https:\/\/script\.google\.com$|^https:\/\/[a-z0-9.-]*googleusercontent\.com$/i;
+ function tellUrl(){
+   const app=document.getElementById('app');
+   const savedUrl=localStorage.getItem(KEY)||'';
+   if(!app||!app.contentWindow||!valid(savedUrl))return;
+   const msg={type:'UNITRACK_EXEC_URL',url:savedUrl.split('?')[0]};
+   try{app.contentWindow.postMessage(msg,'*')}catch(_){}
+   try{app.contentWindow.frames[0].postMessage(msg,'*')}catch(_){}
+ }
+ window.addEventListener('message',function(e){
+   const d=e.data||{};
+   if(d.type==='UNITRACK_APP_NAV_READY'){
+     const savedUrl=localStorage.getItem(KEY)||'';
+     if(valid(savedUrl) && GAS.test(e.origin)){
+       try{e.source.postMessage({type:'UNITRACK_EXEC_URL',url:savedUrl.split('?')[0]},'*')}catch(_){}
+     }
+     setTimeout(tellUrl,400);
+   }
+   if(d.type!=='UNITRACK_UPDATE_READY'||!GAS.test(e.origin))return;
+   if(Date.now()-lastReload<20000)return;
+   const u=localStorage.getItem(KEY)||'';if(!valid(u))return;
+   lastReload=Date.now();
+   const f=document.getElementById('app');if(!f)return;
+   const next=new URL(utWithUser(u));next.searchParams.set('utUpdate',String(Date.now()));
+   f.src=next.toString();
+ });
+ window.addEventListener('load',function(){setTimeout(tellUrl,1800)});
+ document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(tellUrl,250)});
+})();
+</script>
 </body></html>

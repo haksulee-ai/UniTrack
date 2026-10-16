@@ -1,14 +1,35 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d609d"><meta name="application-name" content="UniTrack"><meta name="apple-mobile-web-app-title" content="UniTrack"><meta name="apple-mobile-web-app-capable" content="yes"><title>UniTrack V125</title><link id="appFavicon" rel="icon" type="image/png" sizes="192x192" href="./icon-192.png"><link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png"><link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png"><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;background:#f2f4f8}#frame{width:100%;height:100%;border:0;display:block}#scanShell{display:none;position:fixed;inset:0;z-index:100;background:#0d1016;color:#fff;font-family:system-ui;flex-direction:column}#scanShell.active{display:flex}#scanShell video{width:100%;min-height:0;flex:1;object-fit:cover}#scanShell .scanActions{padding:10px 14px 20px;text-align:center;background:#111827}#scanShell button{padding:10px 22px;background:#fff;border:0;border-radius:9px;font-weight:750}#scanShell p{margin:6px;font-size:14px}#scanShell .nativeScanStage{position:relative;min-height:0;flex:1;overflow:hidden;background:#000}#scanShell .nativeScanStage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#scanShell .nativeScanFrame{position:absolute;left:7%;right:7%;top:32%;height:30%;border:3px solid #fff;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.30);overflow:hidden;pointer-events:none}#scanShell .nativeScanLaser{position:absolute;left:3%;right:3%;top:8%;height:2px;background:#ff1738;box-shadow:0 0 2px rgba(255,23,56,.55);animation:utV120SharpSweep 1.65s ease-in-out infinite alternate}@keyframes utV120SharpSweep{0%{top:8%}100%{top:90%}}</style></head><body><iframe id="frame" title="UniTrack 로그인 및 관리 화면" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen" loading="eager"></iframe><div id="scanShell"><div class="nativeScanStage"><video id="nativeScanVideo" autoplay muted playsinline></video><div class="nativeScanFrame"><span class="nativeScanLaser"></span></div></div><div class="scanActions"><p id="nativeScanText">카메라를 준비하는 중...</p><button id="nativeScanClose" type="button">닫기</button></div></div><script>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d609d"><meta name="application-name" content="UniTrack"><meta name="apple-mobile-web-app-title" content="UniTrack"><meta name="apple-mobile-web-app-capable" content="yes"><title>UniTrack V126</title><link id="appFavicon" rel="icon" type="image/png" sizes="192x192" href="./icon-192.png"><link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png"><link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png"><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;background:#f2f4f8}#frame{width:100%;height:100%;border:0;display:block}#scanShell{display:none;position:fixed;inset:0;z-index:100;background:#0d1016;color:#fff;font-family:system-ui;flex-direction:column}#scanShell.active{display:flex}#scanShell video{width:100%;min-height:0;flex:1;object-fit:cover}#scanShell .scanActions{padding:10px 14px 20px;text-align:center;background:#111827}#scanShell button{padding:10px 22px;background:#fff;border:0;border-radius:9px;font-weight:750}#scanShell p{margin:6px;font-size:14px}#scanShell .nativeScanStage{position:relative;min-height:0;flex:1;overflow:hidden;background:#000}#scanShell .nativeScanStage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#scanShell .nativeScanFrame{position:absolute;left:7%;right:7%;top:32%;height:30%;border:3px solid #fff;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.30);overflow:hidden;pointer-events:none}#scanShell .nativeScanLaser{position:absolute;left:3%;right:3%;top:8%;height:2px;background:#ff1738;box-shadow:0 0 2px rgba(255,23,56,.55);animation:utV120SharpSweep 1.65s ease-in-out infinite alternate}@keyframes utV120SharpSweep{0%{top:8%}100%{top:90%}}</style></head><body><iframe id="frame" title="UniTrack 로그인 및 관리 화면" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen" loading="eager"></iframe><div id="scanShell"><div class="nativeScanStage"><video id="nativeScanVideo" autoplay muted playsinline></video><div class="nativeScanFrame"><span class="nativeScanLaser"></span></div></div><div class="scanActions"><p id="nativeScanText">카메라를 준비하는 중...</p><button id="nativeScanClose" type="button">닫기</button></div></div><script>
 (function(){
- const initial='https://script.google.com/macros/s/AKfycbzc4PizeXGRmxLZVROYWVbFdoFBbB7Xvrm7qzOYU0xA_ZPSN2NwWxuuc1S9XWJBEnnt6w/exec';
+ 'use strict';
+ const initial="https://script.google.com/macros/s/AKfycbzc4PizeXGRmxLZVROYWVbFdoFBbB7Xvrm7qzOYU0xA_ZPSN2NwWxuuc1S9XWJBEnnt6w/exec";
+ const KEY='utSelectedExecUrlV126';
  const frame=document.getElementById('frame');
- function valid(u){return /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:[?#].*)?$/.test(u)}
- function load(u){if(valid(u)&&frame.getAttribute('src')!==u)frame.src=u}
- load(initial);
- fetch('./latest-deployment.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(d&&valid(d.execUrl))load(d.execUrl)}).catch(()=>{});
+ const VALID=/^https:\/\/script\.google\.com\/macros\/s\/[a-zA-Z0-9_-]+\/exec\/?$/;
+ const normal=u=>String(u||'').trim().replace(/\/$/,'');
+ const valid=u=>VALID.test(normal(u));
+ let defaultUrl=initial;
+ let override='';
+ try{override=normal(localStorage.getItem(KEY));if(!valid(override))override=''}catch(e){}
+ function load(u){u=normal(u);if(valid(u)&&frame.getAttribute('src')!==u)frame.setAttribute('src',u)}
+ function current(){return override||defaultUrl}
+ load(current());
+ fetch('./latest-deployment.json?t='+Date.now(),{cache:'no-store'})
+   .then(r=>r.ok?r.json():null).then(d=>{
+     if(d&&valid(d.execUrl)){defaultUrl=normal(d.execUrl);if(!override)load(defaultUrl)}
+   }).catch(()=>{});
+ function reply(e,data){try{e.source.postMessage(data,'*')}catch(_){}}
  window.addEventListener('message',e=>{
+   if(e.source!==frame.contentWindow)return;
    const d=e.data||{};
-   // GitHub icon-192.png remains the favicon before and after login.
+   if(d.type==='UNITRACK_VERSION_GET')reply(e,{type:'UNITRACK_VERSION_INFO',execUrl:current()});
+   if(d.type==='UNITRACK_VERSION_APPLY'){
+     const target=normal(d.execUrl);
+     if(!valid(target)){reply(e,{type:'UNITRACK_VERSION_ERROR',message:'유효하지 않은 배포 주소입니다.'});return}
+     try{localStorage.setItem(KEY,target);override=target}
+     catch(err){reply(e,{type:'UNITRACK_VERSION_ERROR',message:'설정을 저장할 수 없습니다. 브라우저 저장소를 확인하세요.'});return}
+     if(frame.getAttribute('src')===target)window.location.reload();
+     else load(target);
+   }
  });
 })();
 </script>

@@ -2258,9 +2258,6 @@ html.unitrackPortrait:not(.unitrackWide) #configEditOverlay .configEditModal{
   max-height:calc(100dvh - 86px - env(safe-area-inset-top, 0px))!important;
 }
 </style>
-<style id="utV112SignupStyling">
-#utLoginCard #utApplyToggle{display:block;box-sizing:border-box;width:calc(100% - 48px)!important;max-width:calc(100% - 48px)!important}
-</style>
 </head>
 <body>
 <style>
@@ -2304,39 +2301,19 @@ html.unitrackPortrait:not(.unitrackWide) #configEditOverlay .configEditModal{
 #utLoginCard .utLoginSubtitle{margin-left:10px!important;}
 
 </style>
-<div id="utLoginGate"><div id="utLoginCard"><div class="utLoginBrandHeader"><h2><span class="utBrandUni">Uni</span><span class="utBrandT">T</span><span class="utBrandRack">rack</span><span class="utLoginSubtitle">사용자 로그인</span></h2></div><p id="utLoginHint">승인된 이름과 개인 비밀번호로 로그인합니다. 인증은 24시간 유지됩니다.</p><input id="utLoginName" placeholder="이름" autocomplete="name"><input id="utLoginPassword" type="password" placeholder="비밀번호" autocomplete="current-password"><input id="utLoginPasswordConfirm" type="password" placeholder="비밀번호 확인" autocomplete="new-password" style="display:none"><button id="utLoginBtn" onclick="utLoginSubmit()">로그인</button><button id="utRegisterToggle" type="button" onclick="utLoginToggleRegister()" style="background:#eef3fc;color:#1957ad;margin-top:10px">최초 비밀번호 설정</button><button id="utApplyToggle" type="button" onclick="utLoginToggleApply()" style="background:#e8f7ed;color:#176938;margin-top:10px">신규 가입 신청</button><div id="utLoginMessage">로그인 확인 중...</div></div></div>
+<div id="utLoginGate"><div id="utLoginCard"><div class="utLoginBrandHeader"><h2><span class="utBrandUni">Uni</span><span class="utBrandT">T</span><span class="utBrandRack">rack</span><span class="utLoginSubtitle">사용자 로그인</span></h2></div><p id="utLoginHint">승인된 이름과 개인 비밀번호로 로그인합니다. 인증은 24시간 유지됩니다.</p><input id="utLoginName" placeholder="이름" autocomplete="name"><input id="utLoginPassword" type="password" placeholder="비밀번호" autocomplete="current-password"><input id="utLoginPasswordConfirm" type="password" placeholder="비밀번호 확인" autocomplete="new-password" style="display:none"><button id="utLoginBtn" onclick="utLoginSubmit()">로그인</button><button id="utRegisterToggle" type="button" onclick="utLoginToggleRegister()" style="background:#eef3fc;color:#1957ad;margin-top:10px">최초 비밀번호 설정</button><div id="utLoginMessage">로그인 확인 중...</div></div></div>
 <script>
 window.UT_AUTH_TOKEN='';
 let utRegisterMode=false;
-let utApplyMode=false;
 function utLoginMessage(t){document.getElementById('utLoginMessage').textContent=t||'';}
 function utLoginRememberName(n){try{localStorage.setItem('utRememberName',n)}catch(_){}}
 function utLoginToggleRegister(force){
- utApplyMode=false;
- document.getElementById('utApplyToggle').textContent='신규 가입 신청';
- document.getElementById('utRegisterToggle').style.display='block';
  utRegisterMode=typeof force==='boolean'?force:!utRegisterMode;
  document.getElementById('utLoginPasswordConfirm').style.display=utRegisterMode?'block':'none';
  document.getElementById('utLoginBtn').textContent=utRegisterMode?'비밀번호 설정':'로그인';
  document.getElementById('utRegisterToggle').textContent=utRegisterMode?'로그인으로 돌아가기':'최초 비밀번호 설정';
  document.getElementById('utLoginHint').textContent=utRegisterMode?'관리자가 사용자관리 탭의 비밀번호설정허용을 허용으로 설정한 뒤 진행하세요. 비밀번호는 4자 이상입니다.':'이름은 기기에 저장되며, 24시간 후에는 비밀번호만 다시 입력합니다.';
  document.getElementById('utLoginPassword').value='';document.getElementById('utLoginPasswordConfirm').value='';
- utLoginMessage('');
-}
-function utLoginToggleApply(force){
- utApplyMode=typeof force==='boolean'?force:!utApplyMode;
- utRegisterMode=false;
- document.getElementById('utLoginPasswordConfirm').style.display=utApplyMode?'block':'none';
- document.getElementById('utLoginBtn').textContent=utApplyMode?'신청완료':'로그인';
- document.getElementById('utRegisterToggle').style.display=utApplyMode?'none':'block';
- document.getElementById('utRegisterToggle').textContent='최초 비밀번호 설정';
- document.getElementById('utApplyToggle').textContent=utApplyMode?'로그인으로 돌아가기':'신규 가입 신청';
- document.getElementById('utLoginPassword').setAttribute('autocomplete',utApplyMode?'new-password':'current-password');
- document.getElementById('utLoginHint').textContent=utApplyMode?
-   '이름과 비밀번호를 설정하여 신청하세요. 관리자가 사용자관리 시트에서 승인하면 로그인할 수 있습니다.':
-   '이름은 기기에 저장되며, 24시간 후에는 비밀번호만 다시 입력합니다.';
- document.getElementById('utLoginPassword').value='';
- document.getElementById('utLoginPasswordConfirm').value='';
  utLoginMessage('');
 }
 function utLoginOpen(msg){
@@ -2348,14 +2325,9 @@ function utLoginClose(name){document.getElementById('utLoginGate').classList.add
 function utLoginSubmit(){
  const n=document.getElementById('utLoginName').value.trim(),p=document.getElementById('utLoginPassword').value;
  if(!n||!p){utLoginMessage('이름과 비밀번호를 입력하세요.');return;}
- if((utRegisterMode||utApplyMode)&&p!==document.getElementById('utLoginPasswordConfirm').value){utLoginMessage('비밀번호 확인이 일치하지 않습니다.');return;}
+ if(utRegisterMode&&p!==document.getElementById('utLoginPasswordConfirm').value){utLoginMessage('비밀번호 확인이 일치하지 않습니다.');return;}
  const btn=document.getElementById('utLoginBtn');btn.disabled=true;utLoginMessage('확인 중...');
- if(utApplyMode){
-  google.script.run.withSuccessHandler(()=>{
-   btn.disabled=false;utLoginToggleApply(false);
-   utLoginMessage('가입 신청이 완료되었습니다. 관리자 승인 후 로그인할 수 있습니다.');
-  }).withFailureHandler(e=>{btn.disabled=false;utLoginMessage((e&&e.message)||'가입 신청 실패');}).apiAuthApply(n,p);
- }else if(utRegisterMode){
+ if(utRegisterMode){
   google.script.run.withSuccessHandler(()=>{btn.disabled=false;utLoginRememberName(n);utLoginToggleRegister(false);utLoginMessage('비밀번호 설정 완료. 비밀번호를 입력해 로그인하세요.');})
   .withFailureHandler(e=>{btn.disabled=false;utLoginMessage((e&&e.message)||'설정 실패');}).apiAuthRegister(n,p);
  }else{
@@ -4702,7 +4674,7 @@ window.addEventListener('load',unitrackBootMainRoute_);
 /* V101: Check the deployed /exec version without interrupting an edit or upload.
    To release future versions, bump APP_VERSION in Code.gs and UT_CLIENT_VERSION here. */
 (function(){
- const UT_CLIENT_VERSION='V112';
+ const UT_CLIENT_VERSION='V111';
  const CHECK_EVERY_MS=300000;
  let checkInFlight=false, pendingVersion='', lastCheck=0, isReloading=false;
  function numberOf(v){ const m=String(v||'').match(/^V(\d+)$/i); return m?Number(m[1]):0; }
@@ -4775,7 +4747,7 @@ window.addEventListener('load',unitrackBootMainRoute_);
 <script id="utV104LatestApply">
 /* Safe update: verified remote version only; never use a guessed/fallback URL. */
 (function(){
- const CLIENT_VERSION='V112';
+ const CLIENT_VERSION='V111';
  const MANIFEST_URL='https://haksulee-ai.github.io/UniTrack/latest-deployment.json';
  const VALID=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/;
  const normalize=u=>String(u||'').trim().split('?')[0].replace(/\/$/,'');

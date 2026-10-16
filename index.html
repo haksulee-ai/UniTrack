@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d609d"><meta name="application-name" content="UniTrack"><meta name="apple-mobile-web-app-title" content="UniTrack"><meta name="apple-mobile-web-app-capable" content="yes"><title>UniTrack V121</title><link id="appFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='20' fill='%230d609d'/%3E%3Ctext x='48' y='62' text-anchor='middle' font-size='46' font-weight='bold' fill='white'%3EUT%3C/text%3E%3C/svg%3E"><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;background:#f2f4f8}#frame{width:100%;height:100%;border:0;display:block}#scanShell{display:none;position:fixed;inset:0;z-index:100;background:#0d1016;color:#fff;font-family:system-ui;flex-direction:column}#scanShell.active{display:flex}#scanShell video{width:100%;min-height:0;flex:1;object-fit:cover}#scanShell .scanActions{padding:10px 14px 20px;text-align:center;background:#111827}#scanShell button{padding:10px 22px;background:#fff;border:0;border-radius:9px;font-weight:750}#scanShell p{margin:6px;font-size:14px}#scanShell .nativeScanStage{position:relative;min-height:0;flex:1;overflow:hidden;background:#000}#scanShell .nativeScanStage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#scanShell .nativeScanFrame{position:absolute;left:7%;right:7%;top:32%;height:30%;border:3px solid #fff;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.30);overflow:hidden;pointer-events:none}#scanShell .nativeScanLaser{position:absolute;left:3%;right:3%;top:8%;height:2px;background:#ff1738;box-shadow:0 0 2px rgba(255,23,56,.55);animation:utV120SharpSweep 1.65s ease-in-out infinite alternate}@keyframes utV120SharpSweep{0%{top:8%}100%{top:90%}}</style></head><body><iframe id="frame" title="UniTrack 로그인 및 관리 화면" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen" loading="eager"></iframe><div id="scanShell"><div class="nativeScanStage"><video id="nativeScanVideo" autoplay muted playsinline></video><div class="nativeScanFrame"><span class="nativeScanLaser"></span></div></div><div class="scanActions"><p id="nativeScanText">카메라를 준비하는 중...</p><button id="nativeScanClose" type="button">닫기</button></div></div><script>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d609d"><meta name="application-name" content="UniTrack"><meta name="apple-mobile-web-app-title" content="UniTrack"><meta name="apple-mobile-web-app-capable" content="yes"><title>UniTrack V123</title><link id="appFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='20' fill='%230d609d'/%3E%3Ctext x='48' y='62' text-anchor='middle' font-size='46' font-weight='bold' fill='white'%3EUT%3C/text%3E%3C/svg%3E"><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;background:#f2f4f8}#frame{width:100%;height:100%;border:0;display:block}#scanShell{display:none;position:fixed;inset:0;z-index:100;background:#0d1016;color:#fff;font-family:system-ui;flex-direction:column}#scanShell.active{display:flex}#scanShell video{width:100%;min-height:0;flex:1;object-fit:cover}#scanShell .scanActions{padding:10px 14px 20px;text-align:center;background:#111827}#scanShell button{padding:10px 22px;background:#fff;border:0;border-radius:9px;font-weight:750}#scanShell p{margin:6px;font-size:14px}#scanShell .nativeScanStage{position:relative;min-height:0;flex:1;overflow:hidden;background:#000}#scanShell .nativeScanStage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#scanShell .nativeScanFrame{position:absolute;left:7%;right:7%;top:32%;height:30%;border:3px solid #fff;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.30);overflow:hidden;pointer-events:none}#scanShell .nativeScanLaser{position:absolute;left:3%;right:3%;top:8%;height:2px;background:#ff1738;box-shadow:0 0 2px rgba(255,23,56,.55);animation:utV120SharpSweep 1.65s ease-in-out infinite alternate}@keyframes utV120SharpSweep{0%{top:8%}100%{top:90%}}</style></head><body><iframe id="frame" title="UniTrack 로그인 및 관리 화면" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen" loading="eager"></iframe><div id="scanShell"><div class="nativeScanStage"><video id="nativeScanVideo" autoplay muted playsinline></video><div class="nativeScanFrame"><span class="nativeScanLaser"></span></div></div><div class="scanActions"><p id="nativeScanText">카메라를 준비하는 중...</p><button id="nativeScanClose" type="button">닫기</button></div></div><script>
 (function(){
  const initial='https://script.google.com/macros/s/AKfycbzc4PizeXGRmxLZVROYWVbFdoFBbB7Xvrm7qzOYU0xA_ZPSN2NwWxuuc1S9XWJBEnnt6w/exec';
  const frame=document.getElementById('frame');
@@ -12,50 +12,82 @@
  });
 })();
 </script>
-<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.12.1/dist/quagga.min.js"></script>
 <script>
 (function(){
+ 'use strict';
  const shell=document.getElementById('scanShell');
  const video=document.getElementById('nativeScanVideo');
  const msg=document.getElementById('nativeScanText');
- let stream=null,reader=null,detector=null,timer=0,job='',running=false,requester=null;
- function stop(){running=false;clearTimeout(timer);timer=0;try{reader&&reader.reset()}catch(_){}reader=null;detector=null;try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}stream=null;video.pause();video.srcObject=null;shell.classList.remove('active')}
- function deliver(value){
-   if(!running||!value)return;
-   const text=String(value).trim();if(!text)return;
-   msg.textContent='인식 완료: '+text;
-   try{if(requester)requester.postMessage({type:'UNITRACK_SCAN_RESULT',value:text,requestId:job},'*')}catch(_){}
-   setTimeout(stop,250);
+ const appFrame=document.getElementById('frame');
+ let stream=null,nativeTimer=0,quaggaTimer=0,detector=null,requestId='',requester=null,done=false,busy=false,quaggaBusy=false,generation=0;
+ const APP_URL='https://script.google.com/macros/s/AKfycbzc4PizeXGRmxLZVROYWVbFdoFBbB7Xvrm7qzOYU0xA_ZPSN2NwWxuuc1S9XWJBEnnt6w/exec';
+ function stop(){
+   generation++;clearInterval(nativeTimer);clearInterval(quaggaTimer);
+   nativeTimer=0;quaggaTimer=0;busy=false;quaggaBusy=false;
+   try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}
+   stream=null;video.srcObject=null;shell.classList.remove('active');
+ }
+ function deliver(v){
+   const value=String(v||'').trim();
+   if(!value||done)return;
+   done=true;msg.textContent='인식 완료: '+value;
+   try{navigator.vibrate&&navigator.vibrate([100,50,100])}catch(_){}
+   const payload={type:'UNITRACK_SCAN_RESULT',value,requestId};
+   // Respond to both the requester and the current app iframe. Repeat after teardown.
+   const send=()=>{
+     try{requester&&requester.postMessage(payload,'*')}catch(_){}
+     try{appFrame.contentWindow&&appFrame.contentWindow.postMessage(payload,'*')}catch(_){}
+   };
+   send();setTimeout(send,150);setTimeout(()=>{stop();send()},300);
+ }
+ async function start(id,source){
+   stop();requestId=id;requester=source;done=false;
+   const ticket=generation;shell.classList.add('active');msg.textContent='카메라 준비 중...';
+   try{
+     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1440}},audio:false});
+     if(ticket!==generation){stream.getTracks().forEach(t=>t.stop());return;}
+     const track=stream.getVideoTracks()[0];
+     try{const caps=track.getCapabilities?.()||{};if(Array.isArray(caps.focusMode)&&caps.focusMode.includes('continuous'))await track.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(_){}
+     video.srcObject=stream;await video.play();
+     msg.textContent='바코드를 네모 안에 맞춰 주세요';
+     if('BarcodeDetector' in window){
+       try{const formats=await BarcodeDetector.getSupportedFormats();const wanted=['code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','qr_code','data_matrix'];const use=wanted.filter(x=>formats.includes(x));detector=use.length?new BarcodeDetector({formats:use}):new BarcodeDetector()}catch(_){try{detector=new BarcodeDetector()}catch(__){}}
+       if(detector)nativeTimer=setInterval(async()=>{
+         if(done||busy||!stream||video.readyState<2)return;
+         busy=true;
+         try{const found=await detector.detect(video);const hit=found&&found.find(x=>x&&x.rawValue);if(hit)deliver(hit.rawValue)}catch(_){}finally{busy=false}
+       },110);
+     }
+     // V100 stable fallback: Quagga2 decodeSingle on cropped camera frames, not ZXing.
+     if(window.Quagga){
+       const c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
+       quaggaTimer=setInterval(()=>{
+         if(done||quaggaBusy||!stream||video.readyState<2)return;
+         const vw=video.videoWidth,vh=video.videoHeight;
+         if(!vw||!vh)return;
+         quaggaBusy=true;
+         try{
+           const cw=Math.max(1,Math.round(vw*.94)),ch=Math.max(1,Math.round(vh*.34));
+           c.width=1280;c.height=Math.max(360,Math.round(1280*ch/cw));
+           ctx.drawImage(video,(vw-cw)/2,(vh-ch)/2,cw,ch,0,0,c.width,c.height);
+           Quagga.decodeSingle({
+             src:c.toDataURL('image/jpeg',.92),numOfWorkers:0,locate:true,
+             inputStream:{size:1280,singleChannel:false},
+             decoder:{readers:['code_128_reader','code_39_reader','code_93_reader','ean_reader','ean_8_reader','upc_reader','upc_e_reader','i2of5_reader','2of5_reader','codabar_reader']},
+             locator:{patchSize:'medium',halfSample:false}
+           },res=>{quaggaBusy=false;const value=res&&res.codeResult&&res.codeResult.code;if(value)deliver(value)});
+         }catch(_){quaggaBusy=false}
+       },260);
+     }
+     if(!detector&&!window.Quagga)msg.textContent='바코드 인식 라이브러리를 불러오지 못했습니다.';
+   }catch(e){msg.textContent='카메라 연결 실패: 권한 및 브라우저 설정을 확인해 주세요.';try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}stream=null}
  }
  document.getElementById('nativeScanClose').onclick=stop;
- async function start(id,source){
-   stop();job=id;requester=source;running=true;shell.classList.add('active');msg.textContent='카메라를 준비하는 중...';
-   try{
-     if(!navigator.mediaDevices?.getUserMedia)throw new Error('카메라 API 지원 안 됨');
-     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
-     if(!running)return;
-     video.srcObject=stream;await video.play();
-     msg.textContent='네모칸 안에 바코드 또는 QR 코드를 비춰주세요';
-     // Use callback mode: decoding one promise per frame could hang indefinitely.
-     if(window.ZXing?.BrowserMultiFormatReader){
-       reader=new ZXing.BrowserMultiFormatReader();
-       reader.decodeFromVideoElement(video,(result,error)=>{if(running&&result)deliver(result.getText())});
-       return;
-     }
-     if('BarcodeDetector' in window){
-       try{detector=new BarcodeDetector({formats:['code_128','code_39','ean_13','ean_8','qr_code','itf','codabar','upc_a','upc_e']})}catch(_){detector=new BarcodeDetector()}
-       const loop=async()=>{if(!running)return;try{const found=await detector.detect(video);if(found?.length){deliver(found[0].rawValue);return}}catch(_){}if(running)timer=setTimeout(loop,120)};
-       loop();return;
-     }
-     msg.textContent='스캔 엔진을 사용할 수 없습니다. 브라우저를 확인해 주세요.';
-   }catch(e){msg.textContent='카메라가 열리지 않았습니다. 카메라 권한을 허용해 주세요.'}
- }
  window.addEventListener('message',e=>{
    const d=e.data||{};
-   if(d.type!=='UNITRACK_SCAN_REQUEST')return;
-   // Reply to the exact requester window; Apps Script embeds may be nested.
-   if(!e.source||typeof d.requestId!=='string'||!/^g[0-9a-z]+$/i.test(d.requestId))return;
-   try{e.source.postMessage({type:'UNITRACK_SCAN_ACK',requestId:d.requestId},'*')}catch(_){}
+   if(d.type!=='UNITRACK_SCAN_REQUEST'||!e.source||typeof d.requestId!=='string'||!/^g[0-9a-z]+$/i.test(d.requestId))return;
+   e.source.postMessage({type:'UNITRACK_SCAN_ACK',requestId:d.requestId},'*');
    start(d.requestId,e.source);
  });
 })();

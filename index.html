@@ -1,14 +1,6 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#1768c4"><meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate"><title>UniTrack 실행</title>
-<style>html,body{height:100%}*{box-sizing:border-box}body{margin:0;background:#f2f5fa;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;display:grid;place-items:center;padding:24px;color:#293548}.card{width:min(100%,420px);background:white;border-radius:16px;overflow:hidden;box-shadow:0 10px 32px #14264125}.brand{background:#1768c4;color:white;text-align:center;padding:23px;font-size:24px;font-weight:800}.content{padding:23px;text-align:center}p{line-height:1.6}a{display:block;padding:15px;text-decoration:none;border-radius:10px;background:#1768c4;color:white;font-weight:800;margin-top:18px}small{display:block;color:#687587;margin-top:12px}</style>
-</head><body><div class="card"><div class="brand">UniTrack</div><div class="content"><h2>앱 연결 중...</h2><p>정상 로그인되는 Apps Script 앱으로 이동합니다.</p><a id="open" href="https://script.google.com/macros/s/AKfycbzc4PizeXGRmxLZVROYWVbFdoFBbB7Xvrm7qzOYU0xA_ZPSN2NwWxuuc1S9XWJBEnnt6w/exec">UniTrack 바로 열기</a><small>자동으로 이동하지 않으면 위 버튼을 눌러 주세요.</small></div></div>
-<script>
-(function(){
-'use strict';
-const target="https://script.google.com/macros/s/AKfycbzc4PizeXGRmxLZVROYWVbFdoFBbB7Xvrm7qzOYU0xA_ZPSN2NwWxuuc1S9XWJBEnnt6w/exec";
-// Old installed GitHub PWA versions can cache their own index.html.
-try{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});}}catch(e){}
-// No external manifest fetch: a stale manifest must not override the verified URL.
-window.location.replace(target);
-})();
-</script></body></html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>UniTrack 사용자 로그인</title>
+<meta name="theme-color" content="#f3f5f9">
+<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;min-height:100dvh;background:#f3f5f9;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:#232c38;display:flex;align-items:center;justify-content:center;padding:24px}main{width:min(100%,360px);background:white;border-radius:16px;overflow:hidden;box-shadow:0 12px 35px #00000013}.brand{background:#206ac5;color:white;text-align:center;padding:20px 10px}.brand h1{margin:0;font-size:clamp(19px,5vw,24px);font-weight:800}.uni{color:#ff9e44}.track{color:#f36691}.inside{padding:20px 23px 23px}.hint{color:#647080;font-size:14px;line-height:1.65;margin:0 0 18px}.login{display:block;text-align:center;text-decoration:none;padding:15px 16px;border-radius:9px;background:#205db3;color:white;font-size:17px;font-weight:800}.login:active{background:#174b93}.note{font-size:12px;line-height:1.6;color:#687383;margin:14px 0 0}.status{font-size:12px;color:#a54444;min-height:16px;margin-top:12px}@media(min-width:700px){main{width:390px}}</style>
+</head><body><main><div class="brand"><h1><span class="uni">Uni</span><span class="track">Track</span> 사용자 로그인</h1></div><div class="inside"><p class="hint">기존 UniTrack 로그인 화면으로 연결합니다.<br>승인된 이름과 개인 비밀번호로 로그인합니다.</p><a class="login" id="start" href="https://script.google.com/macros/s/AKfycbzc4PizeXGRmxLZVROYWVbFdoFBbB7Xvrm7qzOYU0xA_ZPSN2NwWxuuc1S9XWJBEnnt6w/exec" rel="noreferrer">로그인 화면 열기</a><p class="note">보안을 위해 이름과 비밀번호는 이동한 Apps Script 화면에서 입력합니다. 신규 가입 신청 기능은 포함되지 않습니다.</p><div class="status" id="status" role="status"></div></div></main>
+<script>const target="https://script.google.com/macros/s/AKfycbzc4PizeXGRmxLZVROYWVbFdoFBbB7Xvrm7qzOYU0xA_ZPSN2NwWxuuc1S9XWJBEnnt6w/exec";document.getElementById('start').addEventListener('click',()=>{document.getElementById('status').textContent='Apps Script 로그인 화면으로 이동합니다...'});</script></body></html>

@@ -38,7 +38,7 @@ async function utChoiceConfig(version){
  return {version:m.version,execUrl:norm(m.execUrl)};
 }
 async function utChoiceList(){
- const m=await latestInfo();const n=Number(m.version.substring(1));
+ const m=await Promise.race([latestInfo(),new Promise((_,reject)=>setTimeout(()=>reject(Error('최신 설정 확인 지연: 네트워크 연결을 확인한 뒤 다시 시도해 주세요.')),12000))]);const n=Number(m.version.substring(1));
  const choices=[];
  const latestCfg=await utChoiceConfig(m.version);
  if(latestCfg.execUrl!==norm(m.execUrl))throw Error('최신 릴리스 설정과 서버 주소가 일치하지 않습니다');
@@ -48,7 +48,7 @@ async function utChoiceList(){
 }
 window.addEventListener('message',async function(e){
  const d=e.data||{};if(d.type!=='UNITRACK_RELEASE_CHOICES_GET'&&d.type!=='UNITRACK_SELECT_RELEASE')return;
- if(e.source!==frame.contentWindow)return;
+ if(e.source!==frame.contentWindow&&!/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/i.test(e.origin||''))return;
  if(d.type==='UNITRACK_RELEASE_CHOICES_GET'){
   try{deliver('UNITRACK_RELEASE_CHOICES',{choices:await utChoiceList()},e.source)}
   catch(err){deliver('UNITRACK_RELEASE_CHOICES',{choices:[],error:String(err.message||err)},e.source)}

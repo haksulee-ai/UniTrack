@@ -11,6 +11,32 @@ function deliver(type,payload,target){const data=Object.assign({type},payload||{
 async function json(url){const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('배포 설정 읽기 실패');return r.json()}
 async function latestInfo(){const m=await json('../../latest-deployment.json');if(!/^V\d+$/.test(m.version||'')||!valid(m.execUrl))throw Error('새 배포 주소 설정이 필요합니다');return m}
 function getServerVersion(url){return new Promise(done=>{if(!valid(url))return done(null);const script=document.createElement('script');let ended=false;const finish=v=>{if(ended)return;ended=true;clearTimeout(t);script.remove();if(window.utV101VersionResult===callback)delete window.utV101VersionResult;done(v&&/^V\d+$/.test(v.version||'')?v.version:null)};const callback=v=>finish(v);window.utV101VersionResult=callback;const t=setTimeout(()=>finish(null),9000);script.onerror=()=>finish(null);script.src=url+'?action=unitrackVersion&_='+Date.now();document.head.append(script)})}
+// V146 patch: dual-path server version check. JSONP first, isolated HTML proof second.
+let proofJob=null;
+function versionFromAppFrame(url){
+ if(proofJob && proofJob.url===url)return proofJob.promise;
+ const job={url,done:false,frame:document.createElement('iframe')};
+ job.frame.setAttribute('aria-hidden','true');job.frame.tabIndex=-1;
+ job.frame.style.cssText='position:fixed;left:-2px;top:-2px;width:1px;height:1px;opacity:0;pointer-events:none;border:0';
+ job.promise=new Promise(resolve=>{
+  const finish=v=>{if(job.done)return;job.done=true;clearTimeout(timer);window.removeEventListener('message',onMessage);job.frame.remove();if(proofJob===job)proofJob=null;resolve(v)};
+  const onMessage=e=>{const d=e.data||{};if(d.type!=='UNITRACK_VERSION_PROOF'||!/^V\d+$/.test(d.version||''))return;
+   const trusted=e.source===job.frame.contentWindow||/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/i.test(e.origin||'');
+   if(trusted)finish(d.version);
+  };
+  window.addEventListener('message',onMessage);
+  const timer=setTimeout(()=>finish(null),14000);
+  job.frame.addEventListener('load',()=>{try{job.frame.contentWindow.postMessage({type:'UNITRACK_VERSION_PROBE'},'*')}catch(_){}}, {once:true});
+  job.frame.src=url+'?ut_version_probe='+Date.now();
+  document.body.appendChild(job.frame);
+ });proofJob=job;return job.promise;
+}
+const originalGetServerVersion=getServerVersion;
+async function getVerifiedServerVersion(url){
+ const v=await originalGetServerVersion(url);
+ if(v)return v;
+ return await versionFromAppFrame(url);
+}
 function sendStatus(target){deliver('UNITRACK_MANUAL_STATUS',verification||{checked:false,ok:false},target);deliver('UNITRACK_VERSION_INFO',{execUrl:current,latestExecUrl:latest&&latest.execUrl||'',latestVersion:latest&&latest.version||''},target)}
 async function check(target,force=false){
  if(pendingCheck){await pendingCheck;sendStatus(target);return}
@@ -18,7 +44,7 @@ async function check(target,force=false){
  const seq=++requestSeq;
  pendingCheck=(async()=>{
   let m=null,sv=null;
-  try{m=await latestInfo();sv=await getServerVersion(current);if(!sv)throw Error('server version unavailable');
+  try{m=await latestInfo();sv=await getVerifiedServerVersion(current);if(!sv)throw Error('server version unavailable');
    if(seq!==requestSeq)return;
    latest=m;failures=0;lastCheck=Date.now();
    goodStatus={checked:true,ok:PAGE===m.version&&current===norm(m.execUrl)&&sv===PAGE,
@@ -40,8 +66,8 @@ async function init(){try{const own=await json('./release.json');if(own.version!
 window.addEventListener('message',async e=>{const d=e.data||{};const trusted=e.source===frame.contentWindow||/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/i.test(e.origin||'');if(!trusted)return;
 if(d.type==='UNITRACK_VERSION_GET'){await check(e.source)}
 if(d.type==='UNITRACK_VERSION_APPLY'){const u=norm(d.execUrl);if(u===current){deliver('UNITRACK_VERSION_UNCHANGED',{execUrl:current},e.source);return}if(!valid(u)){deliver('UNITRACK_VERSION_ERROR',{message:'올바른 /exec 주소가 아닙니다'},e.source);return} // Explicit rollback by URL: navigate only after validating the server; do not silently replace pinned release.
-const v=await getServerVersion(u);if(!v){deliver('UNITRACK_VERSION_ERROR',{message:'서버 버전을 확인하지 못해 기존 버전을 유지합니다'},e.source);return}if(v===PAGE){deliver('UNITRACK_VERSION_ACCEPTED',{execUrl:u},e.source);current=u;frame.src=u+'?manual='+Date.now();await check(e.source)}else{deliver('UNITRACK_VERSION_ERROR',{message:'이 주소는 '+v+'입니다. 해당 버전의 보존된 GitHub 릴리스를 선택해야 안전하게 전환됩니다.'},e.source)}return}
-if(d.type==='UNITRACK_APPLY_LATEST'){if(requestInProgress)return;requestInProgress=true;try{const m=await latestInfo();const v=await getServerVersion(m.execUrl);if(v!==m.version){deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:false,message:'새 서버 버전 검증 실패 ('+(v||'응답 없음')+'). 기존 버전을 유지합니다.'},e.source);return}const head=await fetch('../../releases/'+m.version.toLowerCase()+'/release.json?t='+Date.now(),{cache:'no-store'});if(!head.ok)throw Error('신규 버전 파일이 없습니다');const frozen=await head.json();if(frozen.version!==m.version||norm(frozen.execUrl)!==norm(m.execUrl))throw Error('신규 버전 파일과 배포 주소가 일치하지 않습니다');try{localStorage.setItem(PIN_KEY,m.version);localStorage.removeItem(OLD_KEY)}catch(_){}deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:true,execUrl:m.execUrl},e.source);setTimeout(()=>location.replace('../../index.html?manual_apply='+Date.now()),350)}catch(err){deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:false,message:String(err.message||err)},e.source)}finally{requestInProgress=false}}
+const v=await getVerifiedServerVersion(u);if(!v){deliver('UNITRACK_VERSION_ERROR',{message:'서버 버전을 확인하지 못해 기존 버전을 유지합니다'},e.source);return}if(v===PAGE){deliver('UNITRACK_VERSION_ACCEPTED',{execUrl:u},e.source);current=u;frame.src=u+'?manual='+Date.now();await check(e.source)}else{deliver('UNITRACK_VERSION_ERROR',{message:'이 주소는 '+v+'입니다. 해당 버전의 보존된 GitHub 릴리스를 선택해야 안전하게 전환됩니다.'},e.source)}return}
+if(d.type==='UNITRACK_APPLY_LATEST'){if(requestInProgress)return;requestInProgress=true;try{const m=await latestInfo();const v=await getVerifiedServerVersion(m.execUrl);if(v!==m.version){deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:false,message:'새 서버 버전 검증 실패 ('+(v||'응답 없음')+'). 기존 버전을 유지합니다.'},e.source);return}const head=await fetch('../../releases/'+m.version.toLowerCase()+'/release.json?t='+Date.now(),{cache:'no-store'});if(!head.ok)throw Error('신규 버전 파일이 없습니다');const frozen=await head.json();if(frozen.version!==m.version||norm(frozen.execUrl)!==norm(m.execUrl))throw Error('신규 버전 파일과 배포 주소가 일치하지 않습니다');try{localStorage.setItem(PIN_KEY,m.version);localStorage.removeItem(OLD_KEY)}catch(_){}deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:true,execUrl:m.execUrl},e.source);setTimeout(()=>location.replace('../../index.html?manual_apply='+Date.now()),350)}catch(err){deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:false,message:String(err.message||err)},e.source)}finally{requestInProgress=false}}
 });
 window.addEventListener('focus',()=>check(null,true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)check(null,true)});setInterval(()=>{if(!document.hidden)check(null,true)},300000);init();
 })();

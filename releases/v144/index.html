@@ -30,6 +30,8 @@ if(d.type==='UNITRACK_APPLY_LATEST'){e.stopImmediatePropagation();if(requestInPr
 
 window.addEventListener('focus',()=>check(null,true));
  setInterval(()=>check(null,true),300000);
+// Restore release bootstrap: initialize the iframe with this release's Apps Script /exec.
+init();
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.12.1/dist/quagga.min.js"></script>
@@ -129,10 +131,7 @@ window.addEventListener('focus',()=>check(null,true));
 #utHostVersionOverlay button{cursor:pointer;border-radius:9px;padding:11px 14px;border:0;font:inherit}#utHostVersionOverlay .ut-switch{width:100%;background:#12659f;color:white;font-weight:700}#utHostVersionOverlay .ut-switch.prev{background:#e6eff7;color:#194d73}#utHostVersionOverlay .ut-switch:disabled{background:#edf2f6;color:#54657b;cursor:default}#utHostVersionOverlay .ut-foot{text-align:right;margin-top:12px}#utHostVersionOverlay .ut-close{background:#edf1f5;color:#344357}
 
 /* Keep the original Apps Script header link; host rollback stays available via bridge. */
-/* Transparent clickable area exactly above the existing Apps Script link icon.
-   The original icon remains visible, and the host picker works even when the app
-   is logged out or the embedded app never responds to postMessage. */
-#utHostVersionButton{display:block!important;appearance:none!important;opacity:0!important;background:transparent!important;border:0!important;box-shadow:none!important;color:transparent!important;touch-action:manipulation!important;cursor:pointer!important;z-index:2147483200!important}
+#utHostVersionButton{display:none!important}
 </style><button id="utHostVersionButton" type="button" aria-label="버전 관리 및 롤백" aria-expanded="false" title="버전 관리">🔗</button>
 <div id="utHostVersionOverlay" role="dialog" aria-modal="true" aria-label="버전 관리"><div class="ut-panel"><h2>버전 관리</h2><p>로그인 전에도 버전을 변경할 수 있습니다. 서버 확인을 기다리지 않고 보존된 화면으로 전환합니다.</p><div id="utHostVersionItems"></div><div class="ut-foot"><button class="ut-close" id="utHostVersionClose" type="button">닫기</button></div></div></div><script id="utStaticRollbackLogic">
 (function(){'use strict';

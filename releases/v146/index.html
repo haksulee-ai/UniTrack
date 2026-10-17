@@ -1,0 +1,138 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d609d"><meta name="application-name" content="UniTrack"><meta name="apple-mobile-web-app-title" content="UniTrack"><meta name="apple-mobile-web-app-capable" content="yes"><title>UniTrack V146</title><link rel="manifest" href="../../manifest.json"><meta name="color-scheme" content="light"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link id="appFavicon" rel="icon" type="image/png" sizes="192x192" href="../../icon-192.png"><link rel="apple-touch-icon" sizes="192x192" href="../../icon-192.png"><link rel="icon" type="image/png" sizes="512x512" href="../../icon-512.png"><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;background:#f2f4f8}#frame{width:100%;height:100%;border:0;display:block}#scanShell{display:none;position:fixed;inset:0;z-index:100;background:#0d1016;color:#fff;font-family:system-ui;flex-direction:column}#scanShell.active{display:flex}#scanShell video{width:100%;min-height:0;flex:1;object-fit:cover}#scanShell .scanActions{padding:10px 14px 20px;text-align:center;background:#111827}#scanShell button{padding:10px 22px;background:#fff;border:0;border-radius:9px;font-weight:750}#scanShell p{margin:6px;font-size:14px}#scanShell .nativeScanStage{position:relative;min-height:0;flex:1;overflow:hidden;background:#000}#scanShell .nativeScanStage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#scanShell .nativeScanFrame{position:absolute;left:7%;right:7%;top:32%;height:30%;border:3px solid #fff;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.30);overflow:hidden;pointer-events:none}#scanShell .nativeScanLaser{position:absolute;left:3%;right:3%;top:8%;height:2px;background:#ff1738;box-shadow:0 0 2px rgba(255,23,56,.55);animation:utV120SharpSweep 1.65s ease-in-out infinite alternate}@keyframes utV120SharpSweep{0%{top:8%}100%{top:90%}}</style></head><body><iframe id="frame" title="UniTrack 로그인 및 관리 화면" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen" loading="eager"></iframe><div id="scanShell"><div class="nativeScanStage"><video id="nativeScanVideo" autoplay muted playsinline></video><div class="nativeScanFrame"><span class="nativeScanLaser"></span></div></div><div class="scanActions"><p id="nativeScanText">카메라를 준비하는 중...</p><button id="nativeScanClose" type="button">닫기</button></div></div><script id="utManualReleaseHost">
+(function(){
+'use strict';
+const PAGE='V146', PIN_KEY='utManualPinnedReleaseV145', OLD_KEY='utSelectedExecUrlV130';
+const frame=document.getElementById('frame');
+const norm=u=>String(u||'').trim().split('?')[0].replace(/\/$/,'');
+const valid=u=>/^https:\/\/script\.google\.com\/macros\/s\/[a-zA-Z0-9_-]+\/exec$/.test(norm(u));
+let server='',current='',latest=null,verification=null,requestInProgress=false;
+let pendingCheck=null,failures=0,goodStatus=null,lastCheck=0,requestSeq=0;
+function deliver(type,payload,target){const data=Object.assign({type},payload||{});try{if(target)target.postMessage(data,'*')}catch(_){};try{if(frame.contentWindow!==target)frame.contentWindow.postMessage(data,'*')}catch(_){}}
+async function json(url){const r=await fetch(url+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('배포 설정 읽기 실패');return r.json()}
+async function latestInfo(){const m=await json('../../latest-deployment.json');if(!/^V\d+$/.test(m.version||'')||!valid(m.execUrl))throw Error('새 배포 주소 설정이 필요합니다');return m}
+function getServerVersion(url){return new Promise(done=>{if(!valid(url))return done(null);const script=document.createElement('script');let ended=false;const finish=v=>{if(ended)return;ended=true;clearTimeout(t);script.remove();if(window.utV101VersionResult===callback)delete window.utV101VersionResult;done(v&&/^V\d+$/.test(v.version||'')?v.version:null)};const callback=v=>finish(v);window.utV101VersionResult=callback;const t=setTimeout(()=>finish(null),9000);script.onerror=()=>finish(null);script.src=url+'?action=unitrackVersion&_='+Date.now();document.head.append(script)})}
+function sendStatus(target){deliver('UNITRACK_MANUAL_STATUS',verification||{checked:false,ok:false},target);deliver('UNITRACK_VERSION_INFO',{execUrl:current,latestExecUrl:latest&&latest.execUrl||'',latestVersion:latest&&latest.version||''},target)}
+async function check(target,force=false){
+ if(pendingCheck){await pendingCheck;sendStatus(target);return}
+ if(!force && verification && Date.now()-lastCheck<45000){sendStatus(target);return}
+ const seq=++requestSeq;
+ pendingCheck=(async()=>{
+  let m=null,sv=null;
+  try{m=await latestInfo();sv=await getServerVersion(current);if(!sv)throw Error('server version unavailable');
+   if(seq!==requestSeq)return;
+   latest=m;failures=0;lastCheck=Date.now();
+   goodStatus={checked:true,ok:PAGE===m.version&&current===norm(m.execUrl)&&sv===PAGE,
+    reason:'mismatch',githubVersion:PAGE,latestVersion:m.version,execUrl:current,serverVersion:sv};
+   verification=goodStatus;
+  }catch(_){
+   if(seq!==requestSeq)return;
+   failures++;lastCheck=Date.now();
+   if(failures>=3){verification=Object.assign({},goodStatus||{githubVersion:PAGE},
+      {checked:true,ok:false,reason:'version_check_failed',consecutiveFailures:failures});}
+   else if(goodStatus){verification=goodStatus;}
+   else{verification={checked:false,ok:false,reason:'checking',githubVersion:PAGE};}
+  }
+ })();
+ try{await pendingCheck}finally{pendingCheck=null}
+ sendStatus(target);
+}
+async function init(){try{const own=await json('./release.json');if(own.version!==PAGE||!valid(own.execUrl))throw Error('릴리스 설정 오류');server=norm(own.execUrl);current=server;try{localStorage.setItem(PIN_KEY,PAGE)}catch(_){};frame.src=server+'?release='+PAGE+'&t='+Date.now();frame.addEventListener('load',()=>{deliver('UNITRACK_EXEC_URL',{url:current});sendStatus()}, {once:true});await check()}catch(e){document.getElementById('manualSetupError').hidden=false;document.getElementById('manualSetupError').textContent='릴리스 설정을 확인해 주세요: '+e.message}}
+window.addEventListener('message',async e=>{const d=e.data||{};const trusted=e.source===frame.contentWindow||/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/i.test(e.origin||'');if(!trusted)return;
+if(d.type==='UNITRACK_VERSION_GET'){await check(e.source)}
+if(d.type==='UNITRACK_VERSION_APPLY'){const u=norm(d.execUrl);if(u===current){deliver('UNITRACK_VERSION_UNCHANGED',{execUrl:current},e.source);return}if(!valid(u)){deliver('UNITRACK_VERSION_ERROR',{message:'올바른 /exec 주소가 아닙니다'},e.source);return} // Explicit rollback by URL: navigate only after validating the server; do not silently replace pinned release.
+const v=await getServerVersion(u);if(!v){deliver('UNITRACK_VERSION_ERROR',{message:'서버 버전을 확인하지 못해 기존 버전을 유지합니다'},e.source);return}if(v===PAGE){deliver('UNITRACK_VERSION_ACCEPTED',{execUrl:u},e.source);current=u;frame.src=u+'?manual='+Date.now();await check(e.source)}else{deliver('UNITRACK_VERSION_ERROR',{message:'이 주소는 '+v+'입니다. 해당 버전의 보존된 GitHub 릴리스를 선택해야 안전하게 전환됩니다.'},e.source)}return}
+if(d.type==='UNITRACK_APPLY_LATEST'){if(requestInProgress)return;requestInProgress=true;try{const m=await latestInfo();const v=await getServerVersion(m.execUrl);if(v!==m.version){deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:false,message:'새 서버 버전 검증 실패 ('+(v||'응답 없음')+'). 기존 버전을 유지합니다.'},e.source);return}const head=await fetch('../../releases/'+m.version.toLowerCase()+'/release.json?t='+Date.now(),{cache:'no-store'});if(!head.ok)throw Error('신규 버전 파일이 없습니다');const frozen=await head.json();if(frozen.version!==m.version||norm(frozen.execUrl)!==norm(m.execUrl))throw Error('신규 버전 파일과 배포 주소가 일치하지 않습니다');try{localStorage.setItem(PIN_KEY,m.version);localStorage.removeItem(OLD_KEY)}catch(_){}deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:true,execUrl:m.execUrl},e.source);setTimeout(()=>location.replace('../../index.html?manual_apply='+Date.now()),350)}catch(err){deliver('UNITRACK_APPLY_LATEST_RESULT',{ok:false,message:String(err.message||err)},e.source)}finally{requestInProgress=false}}
+});
+window.addEventListener('focus',()=>check(null,true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)check(null,true)});setInterval(()=>{if(!document.hidden)check(null,true)},300000);init();
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.12.1/dist/quagga.min.js"></script>
+<script>
+(function(){
+ 'use strict';
+ const shell=document.getElementById('scanShell');
+ const video=document.getElementById('nativeScanVideo');
+ const msg=document.getElementById('nativeScanText');
+ const appFrame=document.getElementById('frame');
+ let stream=null,nativeTimer=0,quaggaTimer=0,detector=null,requestId='',requester=null,done=false,busy=false,quaggaBusy=false,generation=0;
+ const APP_URL=location.href; // native scanner uses postMessage bridge
+ function stop(){
+   generation++;clearInterval(nativeTimer);clearInterval(quaggaTimer);
+   nativeTimer=0;quaggaTimer=0;busy=false;quaggaBusy=false;
+   try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}
+   stream=null;video.srcObject=null;shell.classList.remove('active');
+ }
+ function deliver(v){
+   const value=String(v||'').trim();
+   if(!value||done)return;
+   done=true;msg.textContent='인식 완료: '+value;
+   try{navigator.vibrate&&navigator.vibrate([100,50,100])}catch(_){}
+   const payload={type:'UNITRACK_SCAN_RESULT',value,requestId};
+   // Respond to both the requester and the current app iframe. Repeat after teardown.
+   const send=()=>{
+     try{requester&&requester.postMessage(payload,'*')}catch(_){}
+     try{appFrame.contentWindow&&appFrame.contentWindow.postMessage(payload,'*')}catch(_){}
+   };
+   send();setTimeout(send,150);setTimeout(()=>{stop();send()},300);
+ }
+ async function start(id,source){
+   stop();requestId=id;requester=source;done=false;
+   const ticket=generation;shell.classList.add('active');msg.textContent='카메라 준비 중...';
+   try{
+     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1440}},audio:false});
+     if(ticket!==generation){stream.getTracks().forEach(t=>t.stop());return;}
+     const track=stream.getVideoTracks()[0];
+     try{const caps=track.getCapabilities?.()||{};if(Array.isArray(caps.focusMode)&&caps.focusMode.includes('continuous'))await track.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(_){}
+     video.srcObject=stream;await video.play();
+     msg.textContent='바코드를 네모 안에 맞춰 주세요';
+     if('BarcodeDetector' in window){
+       try{const formats=await BarcodeDetector.getSupportedFormats();const wanted=['code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','qr_code','data_matrix'];const use=wanted.filter(x=>formats.includes(x));detector=use.length?new BarcodeDetector({formats:use}):new BarcodeDetector()}catch(_){try{detector=new BarcodeDetector()}catch(__){}}
+       if(detector)nativeTimer=setInterval(async()=>{
+         if(done||busy||!stream||video.readyState<2)return;
+         busy=true;
+         try{const found=await detector.detect(video);const hit=found&&found.find(x=>x&&x.rawValue);if(hit)deliver(hit.rawValue)}catch(_){}finally{busy=false}
+       },110);
+     }
+     // V100 stable fallback: Quagga2 decodeSingle on cropped camera frames, not ZXing.
+     if(window.Quagga){
+       const c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
+       quaggaTimer=setInterval(()=>{
+         if(done||quaggaBusy||!stream||video.readyState<2)return;
+         const vw=video.videoWidth,vh=video.videoHeight;
+         if(!vw||!vh)return;
+         quaggaBusy=true;
+         try{
+           const cw=Math.max(1,Math.round(vw*.94)),ch=Math.max(1,Math.round(vh*.34));
+           c.width=1280;c.height=Math.max(360,Math.round(1280*ch/cw));
+           ctx.drawImage(video,(vw-cw)/2,(vh-ch)/2,cw,ch,0,0,c.width,c.height);
+           Quagga.decodeSingle({
+             src:c.toDataURL('image/jpeg',.92),numOfWorkers:0,locate:true,
+             inputStream:{size:1280,singleChannel:false},
+             decoder:{readers:['code_128_reader','code_39_reader','code_93_reader','ean_reader','ean_8_reader','upc_reader','upc_e_reader','i2of5_reader','2of5_reader','codabar_reader']},
+             locator:{patchSize:'medium',halfSample:false}
+           },res=>{quaggaBusy=false;const value=res&&res.codeResult&&res.codeResult.code;if(value)deliver(value)});
+         }catch(_){quaggaBusy=false}
+       },260);
+     }
+     if(!detector&&!window.Quagga)msg.textContent='바코드 인식 라이브러리를 불러오지 못했습니다.';
+   }catch(e){msg.textContent='카메라 연결 실패: 권한 및 브라우저 설정을 확인해 주세요.';try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}stream=null}
+ }
+ document.getElementById('nativeScanClose').onclick=stop;
+ window.addEventListener('message',e=>{
+   const d=e.data||{};
+   if(d.type!=='UNITRACK_SCAN_REQUEST'||!e.source||typeof d.requestId!=='string'||!/^g[0-9a-z]+$/i.test(d.requestId))return;
+   e.source.postMessage({type:'UNITRACK_SCAN_ACK',requestId:d.requestId},'*');
+   start(d.requestId,e.source);
+ });
+})();
+</script><script id="unitrackPwaRegistration">
+(function(){
+  if (!('serviceWorker' in navigator) || !window.isSecureContext) return;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('../../sw.js', {scope:'./'}).catch(function(err){
+      console.warn('UniTrack PWA service worker registration:', err);
+    });
+  });
+})();
+</script><div id="manualSetupError" hidden style="position:fixed;inset:20px;z-index:9999;padding:30px;background:white;color:#a00;font:16px system-ui"></div></body></html>

@@ -127,6 +127,9 @@ window.addEventListener('focus',()=>check(null,true));
 #utHostVersionOverlay h2{font-size:21px;margin:0 0 8px}#utHostVersionOverlay p{font-size:13px;color:#617186;line-height:1.6;margin:0 0 15px}
 #utHostVersionOverlay .ut-option{border:1px solid #dde5ef;border-radius:12px;padding:13px;margin:10px 0}#utHostVersionOverlay .ut-option strong{font-size:16px}#utHostVersionOverlay .ut-option small{display:block;font-size:12px;color:#64748b;margin:6px 0 11px}
 #utHostVersionOverlay button{cursor:pointer;border-radius:9px;padding:11px 14px;border:0;font:inherit}#utHostVersionOverlay .ut-switch{width:100%;background:#12659f;color:white;font-weight:700}#utHostVersionOverlay .ut-switch.prev{background:#e6eff7;color:#194d73}#utHostVersionOverlay .ut-switch:disabled{background:#edf2f6;color:#54657b;cursor:default}#utHostVersionOverlay .ut-foot{text-align:right;margin-top:12px}#utHostVersionOverlay .ut-close{background:#edf1f5;color:#344357}
+
+/* Keep the original Apps Script header link; host rollback stays available via bridge. */
+#utHostVersionButton{display:none!important}
 </style><button id="utHostVersionButton" type="button" aria-label="버전 관리 및 롤백" aria-expanded="false" title="버전 관리">🔗</button>
 <div id="utHostVersionOverlay" role="dialog" aria-modal="true" aria-label="버전 관리"><div class="ut-panel"><h2>버전 관리</h2><p>로그인 전에도 버전을 변경할 수 있습니다. 서버 확인을 기다리지 않고 보존된 화면으로 전환합니다.</p><div id="utHostVersionItems"></div><div class="ut-foot"><button class="ut-close" id="utHostVersionClose" type="button">닫기</button></div></div></div><script id="utStaticRollbackLogic">
 (function(){'use strict';

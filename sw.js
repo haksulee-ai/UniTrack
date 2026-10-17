@@ -1,5 +1,5 @@
 /* UniTrack V140 PWA shell helper. No app data, API or iframe responses are cached. */
-const CACHE = 'unitrack-pwa-shell-v1';
+const CACHE = 'unitrack-pwa-shell-v143';
 const SHELL = ['./icon-192.png', './icon-512.png', './manifest.json'];
 self.addEventListener('install', event => {
   event.waitUntil(

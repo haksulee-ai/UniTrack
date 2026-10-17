@@ -34,7 +34,7 @@ window.addEventListener('focus',()=>check());setInterval(()=>check(),300000);ini
  function currentUrl(){try{const u=norm(localStorage.getItem(key));if(valid(u))return u}catch(_){}return norm(window.__utV144LatestUrl||'')}
  function send(packet,target){try{if(target)target.postMessage(packet,'*')}catch(_){}try{outerFrame.contentWindow.postMessage(packet,'*')}catch(_){} }
  function notify(target){if(status)send(Object.assign({type:'UNITRACK_V144_STATUS'},status),target)}
- function readLatest(){return fetch('./latest-deployment.json?ut_v144='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('GitHub 최신 설정 오류');return r.json()}).then(j=>{if(!valid(j.execUrl)||!/^V\d+$/i.test(j.version||''))throw Error('최신 설정 오류');return {url:norm(j.execUrl),version:j.version}})}
+ function readLatest(){return fetch('../../latest-deployment.json?ut_v144='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('GitHub 최신 설정 오류');return r.json()}).then(j=>{if(!valid(j.execUrl)||!/^V\d+$/i.test(j.version||''))throw Error('최신 설정 오류');return {url:norm(j.execUrl),version:j.version}})}
  function serverVersion(url){return new Promise(resolve=>{
    let finished=false;const callback='utV144ServerCallback';
    const script=document.createElement('script');

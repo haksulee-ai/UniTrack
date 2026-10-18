@@ -92,6 +92,7 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
  const appFrame=document.getElementById('frame');
  let stream=null,nativeTimer=0,quaggaTimer=0,detector=null,zxingReader=null,requestId='',requester=null,done=false,busy=false,quaggaBusy=false,generation=0;
  const APP_URL=location.href; // native scanner uses postMessage bridge
+ const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  function stop(){
    generation++;clearInterval(nativeTimer);clearInterval(quaggaTimer);
    nativeTimer=0;quaggaTimer=0;busy=false;quaggaBusy=false;
@@ -121,7 +122,7 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
      const track=stream.getVideoTracks()[0];
      try{const caps=track.getCapabilities?.()||{};if(Array.isArray(caps.focusMode)&&caps.focusMode.includes('continuous'))await track.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(_){}
      video.srcObject=stream;await video.play();
-     msg.textContent='바코드를 네모 안에 맞춰 주세요';
+     msg.textContent='바코드 또는 QR코드를 네모 안에 맞춰 주세요';
      if('BarcodeDetector' in window){
        try{const formats=await BarcodeDetector.getSupportedFormats();const wanted=['code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','qr_code','data_matrix'];const use=wanted.filter(x=>formats.includes(x));detector=use.length?new BarcodeDetector({formats:use}):new BarcodeDetector()}catch(_){try{detector=new BarcodeDetector()}catch(__){}}
        if(detector)nativeTimer=setInterval(async()=>{
@@ -140,35 +141,31 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
          quaggaBusy=true;
          try{
            const cw=Math.max(1,Math.round(vw*.94)),ch=Math.max(1,Math.round(vh*.34));
-           c.width=1280;c.height=Math.max(360,Math.round(1280*ch/cw));
+           const decodeWidth=isIOS?960:1280;
+           c.width=decodeWidth;c.height=Math.max(isIOS?270:360,Math.round(decodeWidth*ch/cw));
            ctx.drawImage(video,(vw-cw)/2,(vh-ch)/2,cw,ch,0,0,c.width,c.height);
            Quagga.decodeSingle({
              src:c.toDataURL('image/jpeg',.92),numOfWorkers:0,locate:true,
-             inputStream:{size:1280,singleChannel:false},
+             inputStream:{size:isIOS?960:1280,singleChannel:false},
              decoder:{readers:['code_128_reader','code_39_reader','code_93_reader','ean_reader','ean_8_reader','upc_reader','upc_e_reader','i2of5_reader','2of5_reader','codabar_reader']},
              locator:{patchSize:'medium',halfSample:false}
            },res=>{quaggaBusy=false;const value=res&&res.codeResult&&res.codeResult.code;if(value)deliver(value)});
          }catch(_){quaggaBusy=false}
-       },260);
+       },isIOS?650:260);
      }
-     // iOS Safari: native BarcodeDetector may be absent, while Quagga2 only reads 1D.
-     // Decode QR + 1D in parallel using ZXing against the SAME video stream.
-     if(window.ZXing && ZXing.BrowserMultiFormatReader){
+     // Dedicated QR decoding: scanning multiple 1D formats together can delay QR on iOS.
+     // Keep native BarcodeDetector and the known-good Quagga 1D pipeline unchanged.
+     if(window.ZXing && (ZXing.BrowserQRCodeReader || ZXing.BrowserMultiFormatReader)){
        try{
          const hints=new Map();
          if(ZXing.DecodeHintType){
            hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
-           if(ZXing.BarcodeFormat){
-             hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[
-               ZXing.BarcodeFormat.QR_CODE,ZXing.BarcodeFormat.CODE_128,
-               ZXing.BarcodeFormat.CODE_39,ZXing.BarcodeFormat.CODE_93,
-               ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,
-               ZXing.BarcodeFormat.ITF,ZXing.BarcodeFormat.CODABAR,
-               ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E
-             ].filter(x=>x!==undefined));
-           }
+           if(ZXing.BarcodeFormat)
+             hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.QR_CODE]);
          }
-         const reader=new ZXing.BrowserMultiFormatReader(hints,350);
+         // QR-specific reader uses fewer formats and runs continuously on the existing stream.
+         const QRReader=ZXing.BrowserQRCodeReader||ZXing.BrowserMultiFormatReader;
+         const reader=new QRReader(hints,200);
          zxingReader=reader;
          reader.decodeFromVideoElement(video,(result)=>{
            if(done||ticket!==generation||!result)return;

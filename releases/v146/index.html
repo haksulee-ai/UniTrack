@@ -82,6 +82,7 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.12.1/dist/quagga.min.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script>
 (function(){
  'use strict';
@@ -89,11 +90,12 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
  const video=document.getElementById('nativeScanVideo');
  const msg=document.getElementById('nativeScanText');
  const appFrame=document.getElementById('frame');
- let stream=null,nativeTimer=0,quaggaTimer=0,detector=null,requestId='',requester=null,done=false,busy=false,quaggaBusy=false,generation=0;
+ let stream=null,nativeTimer=0,quaggaTimer=0,detector=null,zxingReader=null,requestId='',requester=null,done=false,busy=false,quaggaBusy=false,generation=0;
  const APP_URL=location.href; // native scanner uses postMessage bridge
  function stop(){
    generation++;clearInterval(nativeTimer);clearInterval(quaggaTimer);
    nativeTimer=0;quaggaTimer=0;busy=false;quaggaBusy=false;
+   try{zxingReader&&zxingReader.reset()}catch(_){} zxingReader=null;
    try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}
    stream=null;video.srcObject=null;shell.classList.remove('active');
  }
@@ -149,7 +151,33 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
          }catch(_){quaggaBusy=false}
        },260);
      }
-     if(!detector&&!window.Quagga)msg.textContent='바코드 인식 라이브러리를 불러오지 못했습니다.';
+     // iOS Safari: native BarcodeDetector may be absent, while Quagga2 only reads 1D.
+     // Decode QR + 1D in parallel using ZXing against the SAME video stream.
+     if(window.ZXing && ZXing.BrowserMultiFormatReader){
+       try{
+         const hints=new Map();
+         if(ZXing.DecodeHintType){
+           hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+           if(ZXing.BarcodeFormat){
+             hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[
+               ZXing.BarcodeFormat.QR_CODE,ZXing.BarcodeFormat.CODE_128,
+               ZXing.BarcodeFormat.CODE_39,ZXing.BarcodeFormat.CODE_93,
+               ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,
+               ZXing.BarcodeFormat.ITF,ZXing.BarcodeFormat.CODABAR,
+               ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E
+             ].filter(x=>x!==undefined));
+           }
+         }
+         const reader=new ZXing.BrowserMultiFormatReader(hints,350);
+         zxingReader=reader;
+         reader.decodeFromVideoElement(video,(result)=>{
+           if(done||ticket!==generation||!result)return;
+           const value=typeof result.getText==='function'?result.getText():result.text;
+           if(value)deliver(value);
+         }).catch(()=>{});
+       }catch(_){}
+     }
+     if(!detector&&!window.Quagga&&!window.ZXing)msg.textContent='인식 라이브러리 연결을 확인해 주세요.';
    }catch(e){msg.textContent='카메라 연결 실패: 권한 및 브라우저 설정을 확인해 주세요.';try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}stream=null}
  }
  document.getElementById('nativeScanClose').onclick=stop;

@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko" data-ut-release="V146"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d609d"><meta name="application-name" content="UniTrack"><meta name="apple-mobile-web-app-title" content="UniTrack"><meta name="apple-mobile-web-app-capable" content="yes"><title>UniTrack V146</title><link rel="manifest" href="../../manifest.json"><meta name="color-scheme" content="light"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link id="appFavicon" rel="icon" type="image/png" sizes="192x192" href="../../icon-192.png"><link rel="apple-touch-icon" sizes="192x192" href="../../icon-192.png"><link rel="icon" type="image/png" sizes="512x512" href="../../icon-512.png"><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;background:#f2f4f8}#frame{width:100%;height:100%;border:0;display:block}#scanShell{display:none;position:fixed;inset:0;z-index:100;background:#0d1016;color:#fff;font-family:system-ui;flex-direction:column}#scanShell.active{display:flex}#scanShell video{width:100%;min-height:0;flex:1;object-fit:cover}#scanShell .scanActions{padding:10px 14px 20px;text-align:center;background:#111827}#scanShell button{padding:10px 22px;background:#fff;border:0;border-radius:9px;font-weight:750}#scanShell p{margin:6px;font-size:14px}#utQrPhotoButton{display:none;margin-left:8px}#scanShell.ut-ios #utQrPhotoButton{display:inline-block}#scanShell.ut-ios .nativeScanFrame{left:12%;right:12%;top:16%;height:auto;aspect-ratio:1/1;max-height:65%}#scanShell.ut-ios .scanActions{padding-bottom:max(18px,env(safe-area-inset-bottom))}#scanShell .nativeScanStage{position:relative;min-height:0;flex:1;overflow:hidden;background:#000}#scanShell .nativeScanStage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#scanShell .nativeScanFrame{position:absolute;left:7%;right:7%;top:32%;height:30%;border:3px solid #fff;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.30);overflow:hidden;pointer-events:none}#scanShell .nativeScanLaser{position:absolute;left:3%;right:3%;top:8%;height:2px;background:#ff1738;box-shadow:0 0 2px rgba(255,23,56,.55);animation:utV120SharpSweep 1.65s ease-in-out infinite alternate}@keyframes utV120SharpSweep{0%{top:8%}100%{top:90%}}</style></head><body data-unused=""><iframe id="frame" title="UniTrack 로그인 및 관리 화면" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen" loading="eager"></iframe><div id="scanShell"><div class="nativeScanStage"><video id="nativeScanVideo" autoplay muted playsinline></video><div class="nativeScanFrame"><span class="nativeScanLaser"></span></div></div><div class="scanActions"><p id="nativeScanText">카메라를 준비하는 중...</p><button id="nativeScanClose" type="button">닫기</button><button id="utQrPhotoButton" type="button">사진에서 QR 읽기</button><input id="utQrPhotoInput" type="file" accept="image/*" style="display:none"></div></div><script id="utManualReleaseHost">
+<!doctype html><html lang="ko" data-ut-release="V146"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d609d"><meta name="application-name" content="UniTrack"><meta name="apple-mobile-web-app-title" content="UniTrack"><meta name="apple-mobile-web-app-capable" content="yes"><title>UniTrack V146</title><link rel="manifest" href="../../manifest.json"><meta name="color-scheme" content="light"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link id="appFavicon" rel="icon" type="image/png" sizes="192x192" href="../../icon-192.png"><link rel="apple-touch-icon" sizes="192x192" href="../../icon-192.png"><link rel="icon" type="image/png" sizes="512x512" href="../../icon-512.png"><style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;background:#f2f4f8}#frame{width:100%;height:100%;border:0;display:block}#scanShell{display:none;position:fixed;inset:0;z-index:100;background:#0d1016;color:#fff;font-family:system-ui;flex-direction:column}#scanShell.active{display:flex}#scanShell video{width:100%;min-height:0;flex:1;object-fit:cover}#scanShell .scanActions{padding:10px 14px 20px;text-align:center;background:#111827}#scanShell button{padding:10px 22px;background:#fff;border:0;border-radius:9px;font-weight:750}#scanShell p{margin:6px;font-size:14px}#utQrPhotoButton{display:none;margin-left:8px}#scanShell.ut-ios #utQrPhotoButton{display:inline-block}#scanShell.ut-ios .nativeScanFrame{left:12%;right:12%;top:16%;height:auto;aspect-ratio:1/1;max-height:65%}#scanShell.ut-ios .scanActions{padding-bottom:max(18px,env(safe-area-inset-bottom))}#utIosScanModes{display:none;gap:9px;padding:10px 14px;background:#111827;z-index:2}#scanShell.ut-ios #utIosScanModes{display:flex}#utIosScanModes button{flex:1;border:1px solid #77869b;background:#243247;color:#fff;padding:12px 8px;border-radius:10px;font-size:15px;font-weight:800;min-height:45px}#utIosScanModes button[aria-pressed="true"]{background:#fff;color:#123d66;border-color:#fff}#scanShell.ut-ios.ut-barcode-mode .nativeScanFrame{left:7%;right:7%;top:32%;height:30%;max-height:none;aspect-ratio:auto}#scanShell.ut-ios.ut-barcode-mode #utQrPhotoButton{display:none}#scanShell .nativeScanStage{position:relative;min-height:0;flex:1;overflow:hidden;background:#000}#scanShell .nativeScanStage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#scanShell .nativeScanFrame{position:absolute;left:7%;right:7%;top:32%;height:30%;border:3px solid #fff;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.30);overflow:hidden;pointer-events:none}#scanShell .nativeScanLaser{position:absolute;left:3%;right:3%;top:8%;height:2px;background:#ff1738;box-shadow:0 0 2px rgba(255,23,56,.55);animation:utV120SharpSweep 1.65s ease-in-out infinite alternate}@keyframes utV120SharpSweep{0%{top:8%}100%{top:90%}}</style></head><body data-unused=""><iframe id="frame" title="UniTrack 로그인 및 관리 화면" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen" loading="eager"></iframe><div id="scanShell"><div id="utIosScanModes" role="group" aria-label="아이폰 스캔 종류"><button type="button" id="utIosQrMode" aria-pressed="true">QR코드</button><button type="button" id="utIosBarcodeMode" aria-pressed="false">일반 바코드</button></div><div class="nativeScanStage"><video id="nativeScanVideo" autoplay muted playsinline></video><div class="nativeScanFrame"><span class="nativeScanLaser"></span></div></div><div class="scanActions"><p id="nativeScanText">카메라를 준비하는 중...</p><button id="nativeScanClose" type="button">닫기</button><button id="utQrPhotoButton" type="button">사진에서 QR 읽기</button><input id="utQrPhotoInput" type="file" accept="image/*" style="display:none"></div></div><script id="utManualReleaseHost">
 (function(){
 'use strict';
 const PAGE='V146', PIN_KEY='utManualPinnedReleaseV145', OLD_KEY='utSelectedExecUrlV130';
@@ -91,10 +91,19 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
  const video=document.getElementById('nativeScanVideo');
  const msg=document.getElementById('nativeScanText');
  const appFrame=document.getElementById('frame');
- let stream=null,nativeTimer=0,quaggaTimer=0,qrTimer=0,detector=null,zxingReader=null,requestId='',requester=null,done=false,busy=false,quaggaBusy=false,generation=0;
+ let stream=null,nativeTimer=0,quaggaTimer=0,qrTimer=0,detector=null,zxingReader=null,requestId='',requester=null,done=false,busy=false,quaggaBusy=false,generation=0,scanMode='qr';
  const APP_URL=location.href; // native scanner uses postMessage bridge
  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  if(isIOS)shell.classList.add('ut-ios');
+ const qrButton=document.getElementById('utIosQrMode');
+ const barcodeButton=document.getElementById('utIosBarcodeMode');
+ function syncScanMode(){
+   shell.classList.toggle('ut-barcode-mode',isIOS&&scanMode==='barcode');
+   qrButton.setAttribute('aria-pressed',String(scanMode==='qr'));
+   barcodeButton.setAttribute('aria-pressed',String(scanMode==='barcode'));
+ }
+ qrButton.addEventListener('click',()=>{if(isIOS&&scanMode!=='qr'&&shell.classList.contains('active'))start(requestId,requester,'qr')});
+ barcodeButton.addEventListener('click',()=>{if(isIOS&&scanMode!=='barcode'&&shell.classList.contains('active'))start(requestId,requester,'barcode')});
  const qrCanvas=document.createElement('canvas');
  const qrCtx=qrCanvas.getContext('2d',{willReadFrequently:true});
  let qrBusy=false;
@@ -118,8 +127,8 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
    };
    send();setTimeout(send,150);setTimeout(()=>{stop();send()},300);
  }
- async function start(id,source){
-   stop();requestId=id;requester=source;done=false;
+ async function start(id,source,mode){
+   stop();scanMode=isIOS?(mode==='barcode'?'barcode':'qr'):'auto';syncScanMode();requestId=id;requester=source;done=false;
    const ticket=generation;shell.classList.add('active');msg.textContent='카메라 준비 중...';
    try{
      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:2560},height:{ideal:1440}},audio:false});
@@ -127,9 +136,9 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
      const track=stream.getVideoTracks()[0];
      try{const caps=track.getCapabilities?.()||{};if(Array.isArray(caps.focusMode)&&caps.focusMode.includes('continuous'))await track.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(_){}
      video.srcObject=stream;await video.play();
-     msg.textContent='바코드 또는 QR코드를 네모 안에 맞춰 주세요';
+     msg.textContent=isIOS?(scanMode==='qr'?'QR코드를 정사각형 안에 맞춰 주세요':'일반 바코드를 가로 프레임 안에 맞춰 주세요'):'바코드 또는 QR코드를 네모 안에 맞춰 주세요';
      if('BarcodeDetector' in window){
-       try{const formats=await BarcodeDetector.getSupportedFormats();const wanted=['code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','qr_code','data_matrix'];const use=wanted.filter(x=>formats.includes(x));detector=use.length?new BarcodeDetector({formats:use}):new BarcodeDetector()}catch(_){try{detector=new BarcodeDetector()}catch(__){}}
+       try{const formats=await BarcodeDetector.getSupportedFormats();const wanted=['code_128','code_39','code_93','ean_13','ean_8','upc_a','upc_e','itf','codabar','qr_code','data_matrix'];const chosen=isIOS?(scanMode==='qr'?['qr_code']:wanted.filter(f=>f!=='qr_code'&&f!=='data_matrix')):wanted;const use=chosen.filter(x=>formats.includes(x));if(use.length)detector=new BarcodeDetector({formats:use});else if(!isIOS)detector=new BarcodeDetector()}catch(_){try{detector=new BarcodeDetector()}catch(__){}}
        if(detector)nativeTimer=setInterval(async()=>{
          if(done||busy||!stream||video.readyState<2)return;
          busy=true;
@@ -137,7 +146,7 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
        },110);
      }
      // V100 stable fallback: Quagga2 decodeSingle on cropped camera frames, not ZXing.
-     if(window.Quagga){
+     if(window.Quagga && (!isIOS || scanMode==='barcode')){
        const c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
        quaggaTimer=setInterval(()=>{
          if(done||quaggaBusy||!stream||video.readyState<2)return;
@@ -156,11 +165,11 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
              locator:{patchSize:'medium',halfSample:false}
            },res=>{quaggaBusy=false;const value=res&&res.codeResult&&res.codeResult.code;if(value)deliver(value)});
          }catch(_){quaggaBusy=false}
-       },isIOS?950:260);
+       },isIOS?400:260);
      }
      // iPhone: scan camera image pixels using an independent QR decoder (jsQR).
      // This avoids depending on BarcodeDetector support or ZXing video callback timing.
-     if(isIOS && typeof window.jsQR==='function' && qrCtx){
+     if(isIOS && scanMode==='qr' && typeof window.jsQR==='function' && qrCtx){
        qrTimer=setInterval(()=>{
          if(done||qrBusy||ticket!==generation||!stream||video.readyState<2)return;
          const w=video.videoWidth,h=video.videoHeight;
@@ -180,7 +189,7 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
      }
      // Dedicated QR decoding: scanning multiple 1D formats together can delay QR on iOS.
      // Keep native BarcodeDetector and the known-good Quagga 1D pipeline unchanged.
-     if(window.ZXing && (ZXing.BrowserQRCodeReader || ZXing.BrowserMultiFormatReader)){
+     if((!isIOS || scanMode==='qr') && window.ZXing && (ZXing.BrowserQRCodeReader || ZXing.BrowserMultiFormatReader)){
        try{
          const hints=new Map();
          if(ZXing.DecodeHintType){
@@ -199,8 +208,20 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
          }).catch(()=>{});
        }catch(_){}
      }
+     // iOS barcode mode fallback only when the established Quagga2 decoder is unavailable.
+     if(isIOS && scanMode==='barcode' && !window.Quagga && window.ZXing && ZXing.BrowserMultiFormatReader){
+       try{
+         const hints=new Map();
+         if(ZXing.DecodeHintType && ZXing.BarcodeFormat){
+           hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+           hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,['CODE_128','CODE_39','CODE_93','EAN_13','EAN_8','UPC_A','UPC_E','ITF','CODABAR'].map(x=>ZXing.BarcodeFormat[x]).filter(x=>x!==undefined));
+         }
+         const reader=new ZXing.BrowserMultiFormatReader(hints,350);zxingReader=reader;
+         reader.decodeFromVideoElement(video,(result)=>{if(done||ticket!==generation||!result)return;const val=typeof result.getText==='function'?result.getText():result.text;if(val)deliver(val)}).catch(()=>{});
+       }catch(_){}
+     }
      if(!detector&&!window.Quagga&&!window.ZXing&&typeof window.jsQR!=='function')msg.textContent='인식 라이브러리 연결을 확인해 주세요.';
-     if(isIOS&&typeof window.jsQR!=='function')msg.textContent='QR 보조 인식기 연결 실패. 일반 바코드 스캔 또는 사진 촬영을 시도해 주세요.';
+     if(isIOS&&scanMode==='qr'&&typeof window.jsQR!=='function')msg.textContent='QR 보조 인식기 연결 실패. 일반 바코드 스캔 또는 사진 촬영을 시도해 주세요.';
    }catch(e){msg.textContent='카메라 연결 실패: 권한 및 브라우저 설정을 확인해 주세요.';try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}stream=null}
  }
  // QR photo import for iOS: works for an already captured image as well.
@@ -209,7 +230,7 @@ window.addEventListener('focus',()=>check(null,true));document.addEventListener(
  qrPhoto.addEventListener('change',async()=>{
    const file=qrPhoto.files&&qrPhoto.files[0];
    qrPhoto.value='';
-   if(!file || done)return;
+   if(!file || done || (isIOS && scanMode!=='qr'))return;
    if(typeof window.jsQR!=='function'){msg.textContent='QR 인식 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.';return}
    const stamp=generation;
    msg.textContent='선택한 사진에서 QR코드를 읽는 중...';

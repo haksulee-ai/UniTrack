@@ -310,4 +310,29 @@ window.addEventListener('message',e=>{if(e.data&&e.data.type==='UT_OPEN_HOST_VER
  e.source===document.getElementById('frame')?.contentWindow||/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/i.test(e.origin||'')
  ))open()});
 })();
-</script></body></html>
+</script>
+<script id="utV146HostLoginNameBridge">
+(function(){
+ 'use strict';
+ const KEY='utV146RememberedLoginName';
+ const frame=document.getElementById('frame');
+ function getName(){try{return String(localStorage.getItem(KEY)||'').trim()}catch(_){return ''}}
+ function deliver(){
+  const name=getName();if(!name||!frame||!frame.contentWindow)return;
+  try{frame.contentWindow.postMessage({type:'UT_V146_RESTORE_LOGIN_NAME',name},'*')}catch(_){}
+ }
+ window.addEventListener('message',function(ev){
+  const d=ev.data||{};
+  if(d.type!=='UT_V146_REQUEST_LOGIN_NAME'&&d.type!=='UT_V146_REMEMBER_LOGIN_NAME')return;
+  const validSource=frame&&ev.source===frame.contentWindow;
+  const validOrigin=/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/i.test(ev.origin||'');
+  if(!validSource&&!validOrigin)return;
+  if(d.type==='UT_V146_REQUEST_LOGIN_NAME'){deliver();return;}
+  const name=typeof d.name==='string'?d.name.trim():'';
+  if(!name||name.length>80)return;
+  try{localStorage.setItem(KEY,name)}catch(_){}
+ });
+ if(frame)frame.addEventListener('load',deliver);
+})();
+</script>
+</body></html>

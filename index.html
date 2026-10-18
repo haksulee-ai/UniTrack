@@ -1,33 +1,16 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#075b9b"><link rel="manifest" href="./manifest.json"><link rel="icon" href="./icon-192.png"><title>UniTrack</title><style>body{margin:0;padding:32px;font:16px system-ui;background:#f3f6fa;color:#223}p{line-height:1.6}button{background:#075b9b;color:white;border:0;border-radius:9px;padding:12px}</style></head><body><h2>UniTrack</h2><p id="msg">선택한 버전을 여는 중입니다…</p><button id="reset" hidden>V144 안전 버전 열기</button><script>(async()=>{if(new URLSearchParams(location.search).has('versions'))return;const KEY='utManualPinnedReleaseV145',VALID=/^V\d+$/;let selected='V144';try{const saved=localStorage.getItem(KEY);if(VALID.test(saved||''))selected=saved;else localStorage.setItem(KEY,selected)}catch(_){};const fallback=()=>{document.getElementById('msg').textContent='선택한 버전 화면을 열 수 없습니다. V144 안전 버전을 선택할 수 있습니다.';document.getElementById('reset').hidden=false};document.getElementById('reset').onclick=()=>{localStorage.setItem(KEY,'V144');location.replace('./releases/v144/index.html')};try{const r=await fetch('./releases/'+selected.toLowerCase()+'/release.json?b='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('not found');const cfg=await r.json();if(cfg.version!==selected||!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(cfg.execUrl))throw Error('bad config');location.replace('./releases/'+selected.toLowerCase()+'/index.html')}catch(_){fallback()}})();</script><style id="utStaticRollbackStyle">
-#utHostVersionButton{position:fixed;z-index:2147483200;top:8px;right:70px;width:43px;height:43px;border:2px solid #123e5a;border-radius:50%;background:#eef3f8;color:#145b90;font:25px system-ui;cursor:pointer;display:grid;place-items:center;box-shadow:0 1px 4px #0002}
-#utHostVersionOverlay{display:none;position:fixed;inset:0;z-index:2147483300;background:#142339a8;align-items:center;justify-content:center;padding:18px;font-family:system-ui,sans-serif}
-#utHostVersionOverlay.ut-open{display:flex}#utHostVersionOverlay .ut-panel{width:min(410px,100%);background:white;border-radius:18px;padding:22px;box-shadow:0 14px 40px #0004;color:#172334}
-#utHostVersionOverlay h2{font-size:21px;margin:0 0 8px}#utHostVersionOverlay p{font-size:13px;color:#617186;line-height:1.6;margin:0 0 15px}
-#utHostVersionOverlay .ut-option{border:1px solid #dde5ef;border-radius:12px;padding:13px;margin:10px 0}#utHostVersionOverlay .ut-option strong{font-size:16px}#utHostVersionOverlay .ut-option small{display:block;font-size:12px;color:#64748b;margin:6px 0 11px}
-#utHostVersionOverlay button{cursor:pointer;border-radius:9px;padding:11px 14px;border:0;font:inherit}#utHostVersionOverlay .ut-switch{width:100%;background:#12659f;color:white;font-weight:700}#utHostVersionOverlay .ut-switch.prev{background:#e6eff7;color:#194d73}#utHostVersionOverlay .ut-switch:disabled{background:#edf2f6;color:#54657b;cursor:default}#utHostVersionOverlay .ut-foot{text-align:right;margin-top:12px}#utHostVersionOverlay .ut-close{background:#edf1f5;color:#344357}
-</style><button id="utHostVersionButton" type="button" aria-label="버전 관리 및 롤백" aria-expanded="false" title="버전 관리">🔗</button>
-<div id="utHostVersionOverlay" role="dialog" aria-modal="true" aria-label="버전 관리"><div class="ut-panel"><h2>버전 관리</h2><p>로그인 전에도 버전을 변경할 수 있습니다. 서버 확인을 기다리지 않고 보존된 화면으로 전환합니다.</p><div id="utHostVersionItems"></div><div class="ut-foot"><button class="ut-close" id="utHostVersionClose" type="button">닫기</button></div></div></div><script id="utStaticRollbackLogic">
-(function(){'use strict';
-const KEY='utManualPinnedReleaseV145', PAGE='';
-const BASE=new URL('./', location.href); // repository root
-const versions=[{version:'V147',label:'최신버전'},{version:'V146',label:'이전 버전'}];
-const button=document.getElementById('utHostVersionButton'),overlay=document.getElementById('utHostVersionOverlay'),list=document.getElementById('utHostVersionItems');
-function open(){render();overlay.classList.add('ut-open');button.setAttribute('aria-expanded','true')}
-function close(){overlay.classList.remove('ut-open');button.setAttribute('aria-expanded','false')}
-function render(){list.replaceChildren();versions.forEach(x=>{
- const entry=document.createElement('div');entry.className='ut-option';
- const name=document.createElement('strong');name.textContent=x.version+' · '+x.label;entry.appendChild(name);
- const detail=document.createElement('small');detail.textContent=x.version===PAGE?'현재 실행 중인 화면':x.version==='V146'?'문제가 발생하면 이전 버전으로 돌아갑니다.':'최신 화면으로 다시 전환합니다.';entry.appendChild(detail);
- const go=document.createElement('button');go.type='button';go.className='ut-switch'+(x.version==='V146'?' prev':'');go.textContent=x.version===PAGE?'현재 사용 중':(x.version==='V146'?'↶ V146 롤백':'↻ V147 사용');go.disabled=x.version===PAGE;
- go.onclick=function(){if(!confirm(x.version+' 버전으로 전환하시겠습니까?\n입력 중인 내용은 저장한 뒤 진행해 주세요.'))return;
- try{localStorage.setItem(KEY,x.version);localStorage.removeItem('utSelectedExecUrlV130')}catch(e){alert('기기에 버전 선택을 저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.');return}
- const url=new URL('releases/'+x.version.toLowerCase()+'/index.html',BASE);url.searchParams.set('manual_switch',String(Date.now()));location.replace(url.href);
- };entry.appendChild(go);list.appendChild(entry)
-})}
-button.onclick=open;document.getElementById('utHostVersionClose').onclick=close;
-overlay.addEventListener('click',e=>{if(e.target===overlay)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
-window.addEventListener('message',e=>{if(e.data&&e.data.type==='UT_OPEN_HOST_VERSION_PICKER'&&(
- e.source===document.getElementById('frame')?.contentWindow||/^https:\/\/(?:[a-z0-9-]+\.)*(?:googleusercontent\.com|google\.com)$/i.test(e.origin||'')
- ))open()});
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#075b9b"><title>UniTrack</title><link rel="manifest" href="./manifest.json"><link rel="icon" href="./icon-192.png"></head>
+<body style="margin:0;background:#f3f6fa">
+<script>
+(function(){
+  'use strict';
+  const KEY='utManualPinnedReleaseV145';
+  let selected='V147';
+  try {const saved=localStorage.getItem(KEY);if(/^V\d+$/.test(saved||''))selected=saved;}catch(_){}
+  // The version page itself checks release.json and has its own safe fallback.
+  const target='./releases/'+selected.toLowerCase()+'/index.html';
+  location.replace(target);
 })();
-</script><script>if(new URLSearchParams(location.search).has('versions')){document.getElementById('utHostVersionButton').click();document.getElementById('msg').textContent='복구할 버전을 선택해 주세요.'}</script></body></html>
+</script>
+<noscript>UniTrack을 실행하려면 JavaScript를 켜주세요.</noscript>
+</body></html>

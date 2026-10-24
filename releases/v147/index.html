@@ -335,4 +335,24 @@ window.addEventListener('message',e=>{if(e.data&&e.data.type==='UT_OPEN_HOST_VER
  if(frame)frame.addEventListener('load',deliver);
 })();
 </script>
+
+<script id="utGithub147DeepLinkBridge">
+(function(){
+ 'use strict';
+ const params=new URLSearchParams(location.search);
+ const source=params.get('ut_source')||'';
+ const rowNumber=Number(params.get('ut_row'));
+ const rowId=params.get('ut_id')||'';
+ if(!['SFP','SKT품목','일반유니트'].includes(source)||!Number.isSafeInteger(rowNumber)||rowNumber<2||!rowId||rowId.length>200)return;
+ const iframe=document.getElementById('frame');
+ const payload={type:'UT_GITHUB_V147_DETAIL',source,rowNumber,rowId};
+ let completed=false;
+ function forward(){if(completed)return;try{iframe.contentWindow.postMessage(payload,'*')}catch(_){}}
+ iframe.addEventListener('load',()=>{forward();setTimeout(forward,1500);setTimeout(forward,4500)});
+ window.addEventListener('message',e=>{if(e.data&&e.data.type==='UT_GITHUB_V147_DETAIL_ACK')completed=true;else if(e.data&&e.data.type==='UNITRACK_PAGE_CHANGE')forward()});
+ setTimeout(forward,1000);setTimeout(forward,4000);
+ // Avoid a stale notification link on manual reload.
+ try{history.replaceState(null,'',location.pathname)}catch(_){}
+})();
+</script>
 </body></html>
